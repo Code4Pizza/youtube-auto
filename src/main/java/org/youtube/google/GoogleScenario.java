@@ -1,15 +1,23 @@
 package org.youtube.google;
 
+import org.apache.commons.collections4.map.HashedMap;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.youtube.CommonUtil;
 import org.youtube.GGAccount;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import static java.util.Map.entry;
+
+import java.util.Collection;
+import java.util.Collections;
 
 public class GoogleScenario {
 
@@ -28,6 +36,7 @@ public class GoogleScenario {
 			WebDriverWait wait = new WebDriverWait(driver, 5);
 			wait.until(ExpectedConditions.elementToBeClickable(googleButton));
 			if (driver.findElement(googleButton) != null) {
+				CommonUtil.pause(1);
 				driver.findElement(googleButton).click();
 			} else {
 				throw new GoogleException.GoogleSignInNotFoundException();
@@ -36,6 +45,7 @@ public class GoogleScenario {
 			driver.get("https://www.google.com/");
 			WebElement signInButton = driver.findElement(By.id("gb_70"));
 			if (signInButton != null) {
+				CommonUtil.pause(1);
 				signInButton.click();
 			} else {
 				throw new GoogleException.GoogleSignInNotFoundException();
@@ -85,7 +95,7 @@ public class GoogleScenario {
 
 		if ("username".equals(input.getAttribute("autocomplete"))) {
 			CommonUtil.pause(2);
-			input.sendKeys(account.getEmail());
+			CommonUtil.enterKeys(input, account.getEmail());
 			nextButton.click();
 		}
 
@@ -109,7 +119,7 @@ public class GoogleScenario {
 
 		if ("current-password".equals(input.getAttribute("autocomplete"))) {
 			CommonUtil.pause(2);
-			input.sendKeys(account.getPassword());
+			CommonUtil.enterKeys(input, account.getPassword());
 			nextButton.click();
 		}
 
@@ -125,8 +135,8 @@ public class GoogleScenario {
 				CommonUtil.pause(2);
 
 				WebElement backupElement = driver.findElement(By.id("knowledge-preregistered-email-response"));
-				backupElement.sendKeys(account.getBackup());
-
+//				backupElement.sendKeys(account.getBackup());
+				CommonUtil.enterKeys(backupElement, account.getBackup());
 				By byNext = By.className("VfPpkd-RLmnJb");
 				driver.findElement(byNext).click();
 
@@ -168,6 +178,36 @@ public class GoogleScenario {
 		} catch (RuntimeException e) {
 			throw new GoogleException.GoogleSignOutNotFoundException();
 		}
+	}
+
+	public void checkReviewActivity() {
+		WebElement reviewButton = CommonUtil.findByClassAndAttrs(driver, "gb_zd",
+				Map.ofEntries(entry("role", "button"), entry("tabindex", "0")));
+
+		CommonUtil.pause(1);
+		if (reviewButton == null) {
+			System.out.println("Not found review activity button");
+			return;
+		}
+		reviewButton.click();
+
+		WebElement notificationButton = CommonUtil.waitElement(driver, "PfHrIe",
+				Map.ofEntries(entry("jsname", "cDqwkb")));
+		CommonUtil.pause(1);
+		if (notificationButton == null) {
+			System.out.println("Not found notification button");
+			return;
+		}
+		notificationButton.click();
+
+		WebElement confirmButton = CommonUtil.waitElement(driver, "VfPpkd-LgbsSe",
+				Map.ofEntries(entry("jsname", "j6LnYe")));
+		CommonUtil.pause(1);
+		if (confirmButton == null) {
+			System.out.println("Not found confirm button");
+			return;
+		}
+		confirmButton.click();
 	}
 
 	public void attempToSignOutYouTube() throws GoogleException.GoogleSignOutNotFoundException {

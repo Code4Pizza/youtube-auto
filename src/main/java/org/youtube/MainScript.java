@@ -47,7 +47,7 @@ public class MainScript {
 			}
 
 			googleScenario.attempToSignOutGoogle();
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -67,23 +67,24 @@ public class MainScript {
 
 	public void playScenario3() {
 		List<GGAccount> accounts = ExcelUtil.getAccounts();
-		for (GGAccount account : accounts) {
+
+		for (int i = 0; i < accounts.size()-1; i++) {
 			try {
-				googleScenario.goToGoogleSignInPage(true);
-				googleScenario.attempToLoginGoogle(account);
+				googleScenario.goToGoogleSignInPage(false);
+				googleScenario.attempToLoginGoogle(accounts.get(i));
+				
+//				for (String url : TEST_URLS) {
+//					youtubeScenario.openLink(url);
+//				}
+//
+//				googleScenario.attempToSignOutGoogle();
 
-				for (String url : TEST_URLS) {
-					youtubeScenario.openLink(url);
-				}
-
-				googleScenario.attempToSignOutGoogle();
-
-				CommonUtil.pause(3);
+				CommonUtil.pause(2);
 			} catch (Exception e) {
 				continue;
 			}
 		}
-		
+
 //		DriverUtil.close();
 	}
 

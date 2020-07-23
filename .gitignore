@@ -1,3 +1,7 @@
 target/*
 .idea/*
 youtube-auto.iml
+.classpath
+.project
+.settings/
+bin/
