@@ -69,7 +69,7 @@ public class MainScript {
 		List<GGAccount> accounts = ExcelUtil.getAccounts();
 		for (GGAccount account : accounts) {
 			try {
-				googleScenario.goToGoogleSignInPage(true);
+				googleScenario.goToGoogleSignInPage(false);
 				googleScenario.attempToLoginGoogle(account);
 
 				for (String url : TEST_URLS) {
@@ -84,8 +84,9 @@ public class MainScript {
 			}
 		}
 		
-//		DriverUtil.close();
+		DriverUtil.close();
 	}
+
 
 	public static void main(String[] args) {
 		WebDriver driver = DriverUtil.getInstance();
