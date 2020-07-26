@@ -38,6 +38,17 @@ public class CommonUtil {
 	public static By getBy(WebDriver driver, String className) {
 		return By.className(className);
 	}
+	
+	public static WebElement waitAdShow(WebDriver driver, String className, Map<String, String> mapAttrs) {
+		try {
+			WebDriverWait wait = new WebDriverWait(driver, 900);
+			wait.until(ExpectedConditions.elementToBeClickable(By.className(className)));
+			return findByClassAndAttrs(driver, className, mapAttrs);
+		} catch (RuntimeException e) {
+//			e.printStackTrace();
+			return null;
+		}
+	}
 
 	public static WebElement waitElement(WebDriver driver, String className, Map<String, String> mapAttrs) {
 		try {

@@ -30,6 +30,7 @@ public class GoogleScenario {
 	}
 
 	public void goToGoogleSignInPage(boolean use3rdParty) throws GoogleException.GoogleSignInNotFoundException {
+		System.out.println("Attemp login");
 		if (use3rdParty) {
 			driver.get(GOOGLE_SIGN_IN_3RD_PARTY);
 			By googleButton = By.className("s-btn__google");

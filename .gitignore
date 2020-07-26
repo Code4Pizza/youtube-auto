@@ -5,3 +5,4 @@ youtube-auto.iml
 .project
 .settings/
 bin/
+/target/

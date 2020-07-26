@@ -4,12 +4,16 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.youtube.CommonUtil;
+import org.youtube.youtube.YouTubeException.YouTubeFailedToPlayException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 public class YouTubeScenario {
 
@@ -22,26 +26,35 @@ public class YouTubeScenario {
 	}
 
 	public void openLink(String url) throws YouTubeException.YouTubeFailedToPlayException {
-		CommonUtil.pause(5);
+//		CommonUtil.pause(5);
+
+//		findingAds();
 
 		System.out.println("Open url " + url);
-		long duration = DEFAULT_DELAY;
-		long timeToTakeActions = 0;
+//		long duration = DEFAULT_DELAY;
+//		long timeToTakeActions = 0;
 		driver.get(url);
 		attempToPlay();
-		duration = getVideoDuration();
+//		duration = getVideoDuration();
 
-		long startAction = System.currentTimeMillis();
-		attempToLike();
-		attempToSubscribe();
-		timeToTakeActions = System.currentTimeMillis() - startAction;
-		System.out.println("Time to attemp like and sub " + timeToTakeActions);
+//		long startAction = System.currentTimeMillis();
+//		attempToLike();
+//		attempToSubscribe();
+//		timeToTakeActions = System.currentTimeMillis() - startAction;
+//		System.out.println("Time to attemp like and sub " + timeToTakeActions);
 
 		try {
-			Thread.sleep(duration - timeToTakeActions);
+//			Thread.sleep(duration - timeToTakeActions);
+			
+			// Fix thời gian video lại cho xem khoảng 5 phút thì switch acc 
+			Thread.sleep(200000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+//			e.printStackTrace();
+		} finally {
+//			if (adThread != null) {
+//				adThread.interrupt();
+//			}
 		}
 	}
 
@@ -54,6 +67,8 @@ public class YouTubeScenario {
 			if (titleButtonPlay.contains("Phát") || titleButtonPlay.contains("Play")) {
 				System.out.println("Click play video");
 				playElement.click();
+			} else {
+				System.out.println("Cant find play buton");
 			}
 		} catch (RuntimeException e) {
 			e.printStackTrace();
@@ -145,4 +160,67 @@ public class YouTubeScenario {
 		}
 	}
 
+//	boolean isAdShowing = false;
+//
+//	private Thread adThread;
+//
+//	private int adCount = 0;
+
+//	private void findingAds() {
+//		adThread = new Thread(runable);
+//		adThread.start();
+//	}
+//
+//	private Runnable runable = new Runnable() {
+//
+//		@Override
+//		public void run() {
+//			// TODO Auto-generated method stub
+//			System.out.println("Waiting ad show");
+//			CommonUtil.pause(10);
+//			WebElement adButton = CommonUtil.waitAdShow(driver, "ytp-ad-button-text", null);
+//			if (adButton != null) {
+//				System.out.println("Found Ads, Click it");
+//				CommonUtil.pause(new Random().nextInt(3) + 1);
+//
+//				Actions actions = new Actions(driver);
+//
+//				actions.moveToElement(adButton).click().perform();
+//
+////				adButton.click();
+//
+//				CommonUtil.pause(5);
+//
+//				Set<String> sets = driver.getWindowHandles();
+//				List<String> lists = new ArrayList<String>();
+//				for (String tab : sets) {
+////					System.out.println(tab);
+//					lists.add(tab);
+//				}
+//
+//				if (lists.size() > 1) {
+//					adCount++;
+//					System.out.println("Click ad success " + adCount);
+//					driver.switchTo().window(lists.get(0));
+//					CommonUtil.pause(1);
+//					try {
+//						attempToPlay();
+//					} catch (YouTubeFailedToPlayException e) {
+//						// TODO Auto-generated catch block
+////						e.printStackTrace();
+//					}
+//				}
+////				driver.close();
+//			} else {
+//				System.out.println("Time out waiting ads   ");
+//			}
+//
+//			
+//			CommonUtil.pause(30);
+//			
+//			adThread = new Thread(this);
+//			adThread.start();
+//
+//		}
+//	};
 }
