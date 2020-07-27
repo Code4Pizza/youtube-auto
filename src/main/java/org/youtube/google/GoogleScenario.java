@@ -159,8 +159,8 @@ public class GoogleScenario {
 		}
 
 		CommonUtil.pause(2);
-		System.out.println("Writting cookies");
-		CookiesUtil.writeCookies(driver);
+//		System.out.println("Writting cookies");
+//		CookiesUtil.writeCookies(driver);
 	}
 
 	public void attempToSignOutGoogle() throws GoogleException.GoogleSignOutNotFoundException {
