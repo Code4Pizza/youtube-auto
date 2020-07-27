@@ -9,6 +9,7 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.youtube.CommonUtil;
+import org.youtube.CookiesUtil;
 import org.youtube.GGAccount;
 
 import java.util.List;
@@ -157,6 +158,9 @@ public class GoogleScenario {
 			}
 		}
 
+		CommonUtil.pause(2);
+		System.out.println("Writting cookies");
+		CookiesUtil.writeCookies(driver);
 	}
 
 	public void attempToSignOutGoogle() throws GoogleException.GoogleSignOutNotFoundException {

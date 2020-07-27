@@ -1,0 +1,5 @@
+_gat;1;.stackoverflow.com;/;Mon Jul 27 22:14:29 ICT 2020;false
+__qca;P0-1095191552-1595862809590;.stackoverflow.com;/;Mon Aug 23 22:13:29 ICT 2021;false
+_ga;GA1.2.432841925.1595862809;.stackoverflow.com;/;Wed Jul 27 22:13:51 ICT 2022;false
+prov;5a1dc54b-e17e-5c74-f45e-038ad1311dc2;.stackoverflow.com;/;Fri Jan 01 07:00:00 ICT 2055;false
+_gid;GA1.2.1701482185.1595862809;.stackoverflow.com;/;Tue Jul 28 22:13:51 ICT 2020;false

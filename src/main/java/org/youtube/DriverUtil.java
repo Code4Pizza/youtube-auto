@@ -60,6 +60,7 @@ public class DriverUtil {
 
 //		ChromeDriver driver = new ChromeDriver(desiredCapabilities);
 		ChromeDriver driver = new ChromeDriver(options);
+		CookiesUtil.readCookies(driver);
 		return driver;
 	}
 

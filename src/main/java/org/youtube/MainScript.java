@@ -36,8 +36,8 @@ public class MainScript {
 
 	public static List<String> TAMMY = new ArrayList<String>() {
 		{
-//			add("https://www.youtube.com/watch?v=DThWPOzXz0A");
-//			add("https://www.youtube.com/watch?v=Y9qIIHZTKW4");
+			// add("https://www.youtube.com/watch?v=DThWPOzXz0A");
+			// add("https://www.youtube.com/watch?v=Y9qIIHZTKW4");
 			add("https://www.youtube.com/watch?v=7ie0-OODa-Q");
 		}
 	};
@@ -86,17 +86,17 @@ public class MainScript {
 				System.out.println("Account " + i + " " + accounts.get(i).getEmail());
 				googleScenario.goToGoogleSignInPage(true);
 				googleScenario.attempToLoginGoogle(accounts.get(i));
-//				
-				if (adThread != null) {
-					System.out.println("Interupt Ads");
-					adThread.interrupt();
-				}
-				for (String url : TAMMY) {
-					findingAds();
-					youtubeScenario.openLink(url);
-				}
+				//
+				// if (adThread != null) {
+				// System.out.println("Interupt Ads");
+				// adThread.interrupt();
+				// }
+				// for (String url : TAMMY) {
+				// findingAds();
+				// youtubeScenario.openLink(url);
+				// }
 
-				googleScenario.attempToSignOutGoogle();
+//				googleScenario.attempToSignOutGoogle();
 
 				CommonUtil.pause(2);
 			} catch (Exception e) {
@@ -104,6 +104,8 @@ public class MainScript {
 				continue;
 			}
 		}
+		
+		System.out.println("End scripts");
 
 //		DriverUtil.close();
 	}
@@ -132,14 +134,14 @@ public class MainScript {
 
 				actions.moveToElement(adButton).click().perform();
 
-//				adButton.click();
+				// adButton.click();
 
 				CommonUtil.pause(5);
 
 				Set<String> sets = driver.getWindowHandles();
 				List<String> lists = new ArrayList<String>();
 				for (String tab : sets) {
-//					System.out.println(tab);
+					// System.out.println(tab);
 					lists.add(tab);
 				}
 
@@ -152,10 +154,10 @@ public class MainScript {
 						youtubeScenario.attempToPlay();
 					} catch (YouTubeFailedToPlayException e) {
 						// TODO Auto-generated catch block
-//						e.printStackTrace();
+						// e.printStackTrace();
 					}
 				}
-//				driver.close();
+				// driver.close();
 			} else {
 				System.out.println("Time out waiting ads   ");
 			}
@@ -169,23 +171,27 @@ public class MainScript {
 	};
 
 	public static void main(String[] args) {
-		WebDriver driver = DriverUtil.getInstance();
-		GoogleScenario googleScenario = new GoogleScenario(driver);
-		YouTubeScenario youtubeScenario = new YouTubeScenario(driver);
-		MainScript mainScript = new MainScript(googleScenario, youtubeScenario);
+		// for (int i = 0; i < 2; i++) {
+			WebDriver driver = DriverUtil.initChrome();
+			GoogleScenario googleScenario = new GoogleScenario(driver);
+			YouTubeScenario youtubeScenario = new YouTubeScenario(driver);
+			MainScript mainScript = new MainScript(googleScenario, youtubeScenario);
 
-		mainScript.playScenario3();
+			mainScript.playScenario3();
 
-//		for( int i = 0; i < 2; i++) {
-//			for (String url : TEST_URLS) {
-//				try {
-//					youtubeScenario.openLink(url);
-//				} catch (YouTubeFailedToPlayException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//					continue;
-//				}
-//			}
-//		}
+			// driver.quit();
+		// }
+
+		// for( int i = 0; i < 2; i++) {
+		// for (String url : TEST_URLS) {
+		// try {
+		// youtubeScenario.openLink(url);
+		// } catch (YouTubeFailedToPlayException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// continue;
+		// }
+		// }
+		// }
 	}
 }
