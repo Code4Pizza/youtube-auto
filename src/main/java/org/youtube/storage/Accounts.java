@@ -18,9 +18,17 @@ package org.youtube.storage;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SharedMetricRegistries;
+import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.youtube.entities.Banner;
+import org.youtube.storage.mappers.BannerRowMapper;
 import org.youtube.util.Constants;
 import org.youtube.util.SystemMapper;
+
+import java.util.Date;
+import java.util.List;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 public class Accounts {
 
@@ -28,11 +36,32 @@ public class Accounts {
 
     private final MetricRegistry metricRegistry = SharedMetricRegistries.getOrCreate(Constants.METRICS_NAME);
 
+    private final Timer getBannersTimer = metricRegistry.timer(name(Accounts.class, "getBanners"));
+
+
+
 
     private final FaultTolerantDatabase database;
 
     public Accounts(FaultTolerantDatabase database) {
         this.database = database;
+        this.database.getDatabase().registerRowMapper(new BannerRowMapper());
+
+    }
+
+
+    public List<Banner> getBanners(Integer orgId) {
+        String sql = "SELECT * from cms.banners WHERE organization_id = :orgId\n";
+
+        return database.with(jdbi -> jdbi.withHandle(handle -> {
+            try (Timer.Context ignored = getBannersTimer.time()) {
+                return handle.createQuery(sql)
+                        .bind("orgId", orgId)
+                        .bind("time", new Date(System.currentTimeMillis()))
+                        .mapTo(Banner.class)
+                        .list();
+            }
+        }));
     }
 
 }

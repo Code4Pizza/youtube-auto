@@ -1,12 +1,14 @@
 package org.youtube;
 
 import com.codahale.metrics.jdbi3.strategies.DefaultNameStrategy;
+import com.google.gson.Gson;
 import io.dropwizard.jdbi3.JdbiFactory;
 import org.jdbi.v3.core.Jdbi;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.youtube.configuration.CircuitBreakerConfiguration;
+import org.youtube.entities.Banner;
 import org.youtube.google.GoogleScenario;
 import org.youtube.storage.Accounts;
 import org.youtube.storage.FaultTolerantDatabase;
@@ -89,7 +91,7 @@ public class MainScript {
 
         for (int i = 0; i < accounts.size() - 1; i++) {
             try {
-                System.out.println("Account " + i + " " + accounts.get(i).getEmail());
+                System.out.println("Banner " + i + " " + accounts.get(i).getEmail());
                 googleScenario.goToGoogleSignInPage(false);
                 googleScenario.attempToLoginGoogle(accounts.get(i));
                 //
@@ -178,7 +180,7 @@ public class MainScript {
 
     public static void main(String[] args) {
 
-        String url = "jdbc:mysql://127.0.0.1:3306/abusedb";
+        String url = "jdbc:mysql://10.240.190.1:3306/cms";
         String user = "aichat";
         String pass = "signalchat@2019";
 
@@ -186,14 +188,18 @@ public class MainScript {
 
         FaultTolerantDatabase database = new FaultTolerantDatabase("youtube", jdbi, new CircuitBreakerConfiguration());
         Accounts accounts = new Accounts(database);
+        List<Banner> banners = accounts.getBanners(8);
+        for (Banner banner : banners){
+            System.out.println(new Gson().toJson(banner));
+        }
 
         // for (int i = 0; i < 2; i++) {
-        WebDriver driver = DriverUtil.initChrome();
-        GoogleScenario googleScenario = new GoogleScenario(driver);
-        YouTubeScenario youtubeScenario = new YouTubeScenario(driver);
-        MainScript mainScript = new MainScript(googleScenario, youtubeScenario);
-
-        mainScript.playScenario3();
+//        WebDriver driver = DriverUtil.initChrome();
+//        GoogleScenario googleScenario = new GoogleScenario(driver);
+//        YouTubeScenario youtubeScenario = new YouTubeScenario(driver);
+//        MainScript mainScript = new MainScript(googleScenario, youtubeScenario);
+//
+//        mainScript.playScenario3();
 
         // driver.quit();
         // }
