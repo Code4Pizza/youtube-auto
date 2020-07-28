@@ -204,17 +204,18 @@ public class MainScript {
         List<YoutubeAccount> youtubeAccounts = accounts.getAllAccounts();
         for (YoutubeAccount youtubeAccount : youtubeAccounts) {
             try {
-                googleScenario.goGoogleSignInPage();
+//                googleScenario.goGoogleSignInPage();
+                googleScenario.goGoogleSignInPageThrough3rdParty();
                 googleScenario.attemptToLogin(youtubeAccount);
                 googleScenario.attemptSignOut();
-            } catch (GoogleException | ElementNotInteractableException e) {
+            } catch (Exception e) {
                 severe(e.getMessage());
                 severe("Skip account " + youtubeAccount.getEmail());
                 failedAccount++;
             }
             info("==================End of acc flow=================");
             numberAttempt++;
-            CommonUtil.pause(20);
+//            CommonUtil.pause(20);
         }
         info("Scenario 4 finished");
         info("Number failed acc " + failedAccount);
@@ -234,6 +235,7 @@ public class MainScript {
         try {
             mainScript.playScenario4();
         } catch (Exception e) {
+            e.printStackTrace();
             severe("Scenario suspend unexpectedly");
             severe("Number attempt" + mainScript.numberAttempt);
             severe("Failed account " + mainScript.failedAccount);

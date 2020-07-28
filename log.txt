@@ -1,32 +1,44 @@
-Jul 28, 2020 5:03:38 PM org.youtube.util.LogUtil info
+Jul 28, 2020 5:36:22 PM org.youtube.util.LogUtil info
 INFO: Init log message
-Jul 28, 2020 5:03:41 PM org.openqa.selenium.remote.ProtocolHandshake createSession
+Jul 28, 2020 5:36:23 PM org.openqa.selenium.remote.ProtocolHandshake createSession
 INFO: Detected dialect: W3C
-Jul 28, 2020 5:03:43 PM org.youtube.util.LogUtil info
-INFO: Go to google page
-Jul 28, 2020 5:04:23 PM org.youtube.util.LogUtil info
+Jul 28, 2020 5:36:24 PM org.youtube.util.LogUtil info
+INFO: Signing in google through 3rd party
+Jul 28, 2020 5:36:28 PM org.youtube.util.LogUtil info
 INFO: Signing in email Bisywhdyuwokdtvaidkagxkla@gmail.com ...
-Jul 28, 2020 5:04:52 PM org.youtube.util.LogUtil info
+Jul 28, 2020 5:36:55 PM org.youtube.util.LogUtil info
 INFO: Account Bisywhdyuwokdtvaidkagxkla@gmail.com successfully signed in
-Jul 28, 2020 5:04:55 PM org.youtube.util.LogUtil info
+Jul 28, 2020 5:36:58 PM org.youtube.util.LogUtil info
 INFO: Signing out...
-Jul 28, 2020 5:05:02 PM org.youtube.util.LogUtil info
+Jul 28, 2020 5:37:02 PM org.youtube.util.LogUtil info
 INFO: ==================End of acc flow=================
-Jul 28, 2020 5:05:22 PM org.youtube.util.LogUtil info
-INFO: Go to google page
-Jul 28, 2020 5:05:36 PM org.youtube.util.LogUtil info
+Jul 28, 2020 5:37:02 PM org.youtube.util.LogUtil info
+INFO: Signing in google through 3rd party
+Jul 28, 2020 5:37:05 PM org.youtube.util.LogUtil info
 INFO: Signing in email Baywidtbaidosmuxgaxifvwjkd@gmail.com ...
-Jul 28, 2020 5:05:43 PM org.youtube.util.LogUtil warning
+Jul 28, 2020 5:37:12 PM org.youtube.util.LogUtil warning
 WARNING: Multiple account chooser showing
-Jul 28, 2020 5:05:43 PM org.youtube.util.LogUtil info
+Jul 28, 2020 5:37:13 PM org.youtube.util.LogUtil info
 INFO: Click button using another account
-Jul 28, 2020 5:06:09 PM org.youtube.util.LogUtil info
+Jul 28, 2020 5:37:40 PM org.youtube.util.LogUtil info
 INFO: Account Baywidtbaidosmuxgaxifvwjkd@gmail.com successfully signed in
-Jul 28, 2020 5:06:12 PM org.youtube.util.LogUtil info
+Jul 28, 2020 5:37:43 PM org.youtube.util.LogUtil info
 INFO: Signing out...
-Jul 28, 2020 5:06:12 PM org.youtube.util.LogUtil severe
+Jul 28, 2020 5:37:46 PM org.youtube.util.LogUtil info
+INFO: ==================End of acc flow=================
+Jul 28, 2020 5:37:46 PM org.youtube.util.LogUtil info
+INFO: Signing in google through 3rd party
+Jul 28, 2020 5:37:49 PM org.youtube.util.LogUtil info
+INFO: Signing in email Buietgeijozgsehyehsietoyfuvu@gmail.com ...
+Jul 28, 2020 5:37:56 PM org.youtube.util.LogUtil warning
+WARNING: Multiple account chooser showing
+Jul 28, 2020 5:37:56 PM org.youtube.util.LogUtil info
+INFO: Click button using another account
+Jul 28, 2020 5:38:15 PM org.youtube.util.LogUtil info
+INFO: Google showing confirm backup email panel
+Jul 28, 2020 5:38:25 PM org.youtube.util.LogUtil severe
 SEVERE: Scenario suspend unexpectedly
-Jul 28, 2020 5:06:12 PM org.youtube.util.LogUtil severe
-SEVERE: Number attempt1
-Jul 28, 2020 5:06:12 PM org.youtube.util.LogUtil severe
+Jul 28, 2020 5:38:25 PM org.youtube.util.LogUtil severe
+SEVERE: Number attempt2
+Jul 28, 2020 5:38:25 PM org.youtube.util.LogUtil severe
 SEVERE: Failed account 0
