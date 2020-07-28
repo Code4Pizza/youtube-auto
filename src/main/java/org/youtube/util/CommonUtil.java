@@ -45,15 +45,15 @@ public class CommonUtil {
         return By.className(className);
     }
 
-//	public static WebElement waitAdShow(WebDriver driver, String className, Map<String, String> mapAttrs) {
-//		try {
-//			WebDriverWait wait = new WebDriverWait(driver, 900);
-//			wait.until(ExpectedConditions.elementToBeClickable(By.className(className)));
-//			return findByClassAndAttrs(driver, className, mapAttrs);
-//		} catch (RuntimeException e) {
-//			return null;
-//		}
-//	}
+	public static WebElement waitAdShow(WebDriver driver, String className, Map<String, String> mapAttrs) {
+		try {
+			WebDriverWait wait = new WebDriverWait(driver, 30);
+			wait.until(ExpectedConditions.elementToBeClickable(By.className(className)));
+			return findByClassAndAttrs(driver, getBy(driver, className), mapAttrs);
+		} catch (RuntimeException e) {
+			return null;
+		}
+	}
 
     public static WebElement waitElement(WebDriver driver, By by, Map<String, String> mapAttrs) {
         try {
@@ -65,15 +65,15 @@ public class CommonUtil {
         }
     }
 
-//	public static WebElement waitElement(WebDriver driver, String className, Map<String, String> mapAttrs) {
-//		try {
-//			WebDriverWait wait = new WebDriverWait(driver, 10);
-//			wait.until(ExpectedConditions.elementToBeClickable(By.className(className)));
-//			return findByClassAndAttrs(driver, className, mapAttrs);
-//		} catch (RuntimeException e) {
-//			return null;
-//		}
-//	}
+	public static WebElement waitElement(WebDriver driver, String className, Map<String, String> mapAttrs) {
+		try {
+			WebDriverWait wait = new WebDriverWait(driver, 10);
+			wait.until(ExpectedConditions.elementToBeClickable(By.className(className)));
+			return findByClassAndAttrs(driver, getBy(driver, className), mapAttrs);
+		} catch (RuntimeException e) {
+			return null;
+		}
+	}
 
     public static WebElement findByClassAndAttrs(WebDriver driver, By classNameOrId, Map<String, String> mapAttrs) {
         if (mapAttrs == null) {

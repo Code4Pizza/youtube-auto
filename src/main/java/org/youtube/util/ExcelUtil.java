@@ -9,7 +9,7 @@ import org.jdbi.v3.core.Jdbi;
 import org.youtube.GGAccount;
 import org.youtube.configuration.CircuitBreakerConfiguration;
 import org.youtube.entities.YoutubeAccount;
-import org.youtube.storage.Accounts;
+import org.youtube.storage.YoutubeDatabases;
 import org.youtube.storage.FaultTolerantDatabase;
 
 import java.io.*;
@@ -90,10 +90,10 @@ public class ExcelUtil {
     public static void main(String[] args) {
         Jdbi jdbi = Jdbi.create(BASE_URL, USER_NAME, PASSWORD);
         FaultTolerantDatabase accDatabase = new FaultTolerantDatabase(DB_NAME, jdbi, new CircuitBreakerConfiguration());
-        Accounts accounts = new Accounts(accDatabase);
+        YoutubeDatabases youtubeDatabases = new YoutubeDatabases(accDatabase);
 
         List<YoutubeAccount> youtubeAccounts = readAccountsFromTxtFile();
-        accounts.bulkInsertAccounts(youtubeAccounts);
+        youtubeDatabases.bulkInsertAccounts(youtubeAccounts);
 
         System.out.println("Insert success");
     }

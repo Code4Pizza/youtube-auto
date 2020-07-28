@@ -22,8 +22,12 @@ import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jdbi.v3.core.statement.PreparedBatch;
 import org.jdbi.v3.core.transaction.TransactionIsolationLevel;
+import org.youtube.entities.ChannelVideo;
 import org.youtube.entities.YoutubeAccount;
+import org.youtube.entities.YoutubeChannel;
+import org.youtube.storage.mappers.VideoRowMapper;
 import org.youtube.storage.mappers.YoutubeAccountRowMapper;
+import org.youtube.storage.mappers.YoutubeChannelRowMapper;
 import org.youtube.util.Constants;
 import org.youtube.util.SystemMapper;
 
@@ -31,7 +35,7 @@ import java.util.List;
 
 import static com.codahale.metrics.MetricRegistry.name;
 
-public class Accounts {
+public class YoutubeDatabases {
 
     public static final String SQL_INSERT = "INSERT INTO yt_bot.youtube_accounts" +
             "(email, password, backup_email)" +
@@ -41,15 +45,22 @@ public class Accounts {
 
     private final MetricRegistry metricRegistry = SharedMetricRegistries.getOrCreate(Constants.METRICS_NAME);
 
-    private final Timer getAllAccountsTimer = metricRegistry.timer(name(Accounts.class, "getAllAccounts"));
+    private final Timer getAllAccountsTimer = metricRegistry.timer(name(YoutubeDatabases.class, "getAllAccounts"));
 
-    private final Timer insertsAccountsTimer = metricRegistry.timer(name(Accounts.class, "insertAccounts"));
+    private final Timer insertsAccountsTimer = metricRegistry.timer(name(YoutubeDatabases.class, "insertAccounts"));
+
+    private final Timer getAllChannelsTimer = metricRegistry.timer(name(YoutubeDatabases.class, "getAllChannels"));
+
+    private final Timer getAllChannelVideosTimer = metricRegistry.timer(name(YoutubeDatabases.class, "getAllChannelVideos"));
+
 
     private final FaultTolerantDatabase database;
 
-    public Accounts(FaultTolerantDatabase database) {
+    public YoutubeDatabases(FaultTolerantDatabase database) {
         this.database = database;
         this.database.getDatabase().registerRowMapper(new YoutubeAccountRowMapper());
+        this.database.getDatabase().registerRowMapper(new YoutubeChannelRowMapper());
+        this.database.getDatabase().registerRowMapper(new VideoRowMapper());
     }
 
     public List<YoutubeAccount> getAllAccounts() {
@@ -97,4 +108,33 @@ public class Accounts {
             }
         }));
     }
+
+    public List<YoutubeChannel> getAllChannels() {
+        String sql = "SELECT * from yt_bot.youtube_channels";
+
+        return database.with(jdbi -> jdbi.withHandle(handle -> {
+            try (Timer.Context ignored = getAllChannelsTimer.time()) {
+                return handle.createQuery(sql)
+                        .mapTo(YoutubeChannel.class)
+                        .list();
+            }
+        }));
+    }
+
+
+    public List<ChannelVideo> getAllChannelVideos(YoutubeChannel channel) {
+        String sql = "SELECT * from yt_bot.channel_videos where 1=1 and channel_id = :channelId";
+
+        return database.with(jdbi -> jdbi.withHandle(handle -> {
+            try (Timer.Context ignored = getAllChannelVideosTimer.time()) {
+                return handle.createQuery(sql)
+                        .bind("channelId", channel.getId())
+                        .mapTo(ChannelVideo.class)
+                        .list();
+            }
+        }));
+    }
+
+
+
 }
