@@ -8,7 +8,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.youtube.configuration.CircuitBreakerConfiguration;
-import org.youtube.entities.Banner;
+import org.youtube.entities.YoutubeAccount;
 import org.youtube.google.GoogleScenario;
 import org.youtube.storage.Accounts;
 import org.youtube.storage.FaultTolerantDatabase;
@@ -187,12 +187,24 @@ public class MainScript {
     }
 
     public static void main(String[] args) {
-        WebDriver driver = DriverUtil.initChrome();
-        GoogleScenario googleScenario = new GoogleScenario(driver);
-        YouTubeScenario youtubeScenario = new YouTubeScenario(driver);
-        MainScript mainScript = new MainScript(googleScenario, youtubeScenario);
+//        WebDriver driver = DriverUtil.initChrome();
+//        GoogleScenario googleScenario = new GoogleScenario(driver);
+//        YouTubeScenario youtubeScenario = new YouTubeScenario(driver);
+//        MainScript mainScript = new MainScript(googleScenario, youtubeScenario);
+//
+//        mainScript.playScenario3();
 
-        mainScript.playScenario3();
+
+        // VD ve viec su dung thao tac DB
+        Jdbi jdbi = Jdbi.create("jdbc:mysql://35.240.231.255:3306/yt_bot?autoReconnect=true&useSSL=false",
+                "youtube", "Aic@2020");
+        FaultTolerantDatabase accountDatabase = new FaultTolerantDatabase("accounts_database", jdbi, new CircuitBreakerConfiguration());
+        Accounts accounts = new Accounts(accountDatabase);
+        List<YoutubeAccount> youtubeAccounts = accounts.getAllAccounts();
+        youtubeAccounts.forEach(item -> {
+            System.out.println(new Gson().toJson(item));
+        });
+
 
     }
 }

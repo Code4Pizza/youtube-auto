@@ -20,8 +20,8 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SharedMetricRegistries;
 import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.youtube.entities.Banner;
-import org.youtube.storage.mappers.BannerRowMapper;
+import org.youtube.entities.YoutubeAccount;
+import org.youtube.storage.mappers.YoutubeAccountRowMapper;
 import org.youtube.util.Constants;
 import org.youtube.util.SystemMapper;
 
@@ -36,29 +36,25 @@ public class Accounts {
 
     private final MetricRegistry metricRegistry = SharedMetricRegistries.getOrCreate(Constants.METRICS_NAME);
 
-    private final Timer getBannersTimer = metricRegistry.timer(name(Accounts.class, "getBanners"));
-
-
+    private final Timer getAllAccountsTimer = metricRegistry.timer(name(Accounts.class, "getAllAccounts"));
 
 
     private final FaultTolerantDatabase database;
 
     public Accounts(FaultTolerantDatabase database) {
         this.database = database;
-        this.database.getDatabase().registerRowMapper(new BannerRowMapper());
+        this.database.getDatabase().registerRowMapper(new YoutubeAccountRowMapper());
 
     }
 
 
-    public List<Banner> getBanners(Integer orgId) {
-        String sql = "SELECT * from cms.banners WHERE organization_id = :orgId\n";
+    public List<YoutubeAccount> getAllAccounts() {
+        String sql = "SELECT * from yt_bot.youtube_accounts";
 
         return database.with(jdbi -> jdbi.withHandle(handle -> {
-            try (Timer.Context ignored = getBannersTimer.time()) {
+            try (Timer.Context ignored = getAllAccountsTimer.time()) {
                 return handle.createQuery(sql)
-                        .bind("orgId", orgId)
-                        .bind("time", new Date(System.currentTimeMillis()))
-                        .mapTo(Banner.class)
+                        .mapTo(YoutubeAccount.class)
                         .list();
             }
         }));
