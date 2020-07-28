@@ -15,41 +15,41 @@ import java.util.Map;
 
 public class DriverUtil {
 
-	private static WebDriver driver;
-	
-	private static String USER_AGENT;
-	private static String BROWSER;
+    private static WebDriver driver;
 
-	
-	public static WebDriver getInstance() {
-		if (driver == null) {
-			driver = initChrome();
-		}
-		return driver;
-	}
+    private static String USER_AGENT;
+    private static String BROWSER;
 
-	public static WebDriver initChrome() {
-		String path = System.getProperty("user.dir");
-		System.setProperty("webdriver.chrome.driver", path +"/src/main/resources/chromedriver");
 
-		ChromeOptions options = new ChromeOptions();
-		options.addArguments("--disable-blink-features");
-		options.addArguments("--disable-blink-features=AutomationControlled");
+    public static WebDriver getInstance() {
+        if (driver == null) {
+            driver = initChrome();
+        }
+        return driver;
+    }
 
-		
+    public static WebDriver initChrome() {
+        String path = System.getProperty("user.dir");
+        System.setProperty("webdriver.chrome.driver", path + "/src/main/resources/chromedriver");
+
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--disable-blink-features");
+        options.addArguments("--disable-blink-features=AutomationControlled");
+
+
 //		ChromeOptions options = new ChromeOptions();
-		options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
-		options.setExperimentalOption("useAutomationExtension", false);
+        options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
+        options.setExperimentalOption("useAutomationExtension", false);
 
-		Map<String, String> mapUA = UserAgentUtil.getRandomUserAgent();
-		
-		BROWSER =  mapUA.keySet().stream().findFirst().get();
-		USER_AGENT = mapUA.get(BROWSER);
-		System.out.println(USER_AGENT);
-		
+        Map<String, String> mapUA = UserAgentUtil.getRandomUserAgent();
+
+        BROWSER = mapUA.keySet().stream().findFirst().get();
+        USER_AGENT = mapUA.get(BROWSER);
+        System.out.println(USER_AGENT);
+
 //		options.addArguments(String.format("--user-agent=%s", USER_AGENT));
 //		options.addArguments("--start-maximized");
-		
+
 //		Proxy proxy = new org.openqa.selenium.Proxy();
 //		proxy.setHttpProxy("45.158.186.9:13901");
 //		proxy.setSocksUsername("cJwk0y");
@@ -60,28 +60,28 @@ public class DriverUtil {
 //		desiredCapabilities.setCapability(ChromeOptions.CAPABILITY, options);
 
 //		ChromeDriver driver = new ChromeDriver(desiredCapabilities);
-		options.addExtensions(new File("/home/datvt/IdeaProjects/youtube-bot/youtube-auto/src/main/resources/proxy.zip"));
-		ChromeDriver driver = new ChromeDriver(options);
+        options.addExtensions(new File(path + "/src/main/resources/proxy.zip"));
+        ChromeDriver driver = new ChromeDriver(options);
 //		CookiesUtil.readCookies(driver);
-		return driver;
-	}
+        return driver;
+    }
 
-	public static WebDriver initFirefox() {
-		String path = System.getProperty("user.dir");
-		System.setProperty("webdriver.gecko.driver",  path +"/resources/chromedriver");
-		return new FirefoxDriver();
-	}
+    public static WebDriver initFirefox() {
+        String path = System.getProperty("user.dir");
+        System.setProperty("webdriver.gecko.driver", path + "/resources/chromedriver");
+        return new FirefoxDriver();
+    }
 
-	public static void close() {
-		try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
+    public static void close() {
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
 
-		}
-		if (driver != null) {
-			driver.close();
-			driver.quit();
-		}
-	}
+        }
+        if (driver != null) {
+            driver.close();
+            driver.quit();
+        }
+    }
 
 }
