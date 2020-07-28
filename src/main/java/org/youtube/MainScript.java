@@ -44,9 +44,11 @@ public class MainScript {
 
     public static List<String> TAMMY = new ArrayList<String>() {
         {
-            // add("https://www.youtube.com/watch?v=DThWPOzXz0A");
-            // add("https://www.youtube.com/watch?v=Y9qIIHZTKW4");
-            add("https://www.youtube.com/watch?v=7ie0-OODa-Q");
+            add("https://www.youtube.com/watch?v=3UcZgaa7aFk");
+            add("https://www.youtube.com/watch?v=1aVuVz2OwlQ");
+            add("https://www.youtube.com/watch?v=bjP7lcgwHuQ");
+            add("https://www.youtube.com/watch?v=lY_pQIXb_qY");
+            add("https://www.youtube.com/watch?v=NAieOZt1AlA");
         }
     };
 
@@ -89,22 +91,22 @@ public class MainScript {
     public void playScenario3() {
         List<GGAccount> accounts = ExcelUtil.getAccounts();
 
-        for (int i = 0; i < accounts.size() - 1; i++) {
+        for (GGAccount account : accounts) {
             try {
-                System.out.println("Banner " + i + " " + accounts.get(i).getEmail());
+                System.out.println("Start with account : " + account.getEmail());
                 googleScenario.goToGoogleSignInPage(false);
-                googleScenario.attempToLoginGoogle(accounts.get(i));
+                googleScenario.attempToLoginGoogle(account);
                 //
-                // if (adThread != null) {
-                // System.out.println("Interupt Ads");
-                // adThread.interrupt();
-                // }
-                // for (String url : TAMMY) {
-                // findingAds();
-                // youtubeScenario.openLink(url);
-                // }
+                if (adThread != null) {
+                    System.out.println("Interupt Ads");
+                    adThread.interrupt();
+                }
+                for (String url : TAMMY) {
+                    findingAds();
+                    youtubeScenario.openLink(url);
+                }
 
-//				googleScenario.attempToSignOutGoogle();
+                googleScenario.attempToSignOutGoogle();
 
                 CommonUtil.pause(2);
             } catch (Exception e) {
@@ -120,7 +122,8 @@ public class MainScript {
 
     private Thread adThread;
 
-    private int adCount = 0;
+    private Integer totalAds = 0;
+    private Integer clickedAds = 0;
 
     private void findingAds() {
         adThread = new Thread(runable);
@@ -135,35 +138,34 @@ public class MainScript {
             System.out.println("Waiting ad show");
             WebElement adButton = CommonUtil.waitAdShow(driver, "ytp-ad-button-text", null);
             if (adButton != null) {
-                System.out.println("Found Ads, Click it");
-                CommonUtil.pause(new Random().nextInt(3) + 1);
+                System.out.println("Found Ads, Check it");
+                if (canClick(totalAds, clickedAds)) {
+                    CommonUtil.pause(new Random().nextInt(3) + 1);
 
-                Actions actions = new Actions(driver);
+                    Actions actions = new Actions(driver);
 
-                actions.moveToElement(adButton).click().perform();
+                    actions.moveToElement(adButton).click().perform();
 
-                // adButton.click();
+                    CommonUtil.pause(5);
 
-                CommonUtil.pause(5);
-
-                Set<String> sets = driver.getWindowHandles();
-                List<String> lists = new ArrayList<String>();
-                for (String tab : sets) {
+                    Set<String> sets = driver.getWindowHandles();
                     // System.out.println(tab);
-                    lists.add(tab);
-                }
+                    List<String> lists = new ArrayList<>(sets);
 
-                if (lists.size() > 1) {
-                    adCount++;
-                    System.out.println("Click ad success " + adCount);
-                    driver.switchTo().window(lists.get(0));
-                    CommonUtil.pause(1);
-                    try {
-                        youtubeScenario.attempToPlay();
-                    } catch (YouTubeFailedToPlayException e) {
-                        // TODO Auto-generated catch block
-                        // e.printStackTrace();
+                    if (lists.size() > 1) {
+                        clickedAds++;
+                        System.out.println("Click ad success " + clickedAds);
+                        driver.switchTo().window(lists.get(0));
+                        CommonUtil.pause(1);
+                        try {
+                            youtubeScenario.attempToPlay();
+                        } catch (YouTubeFailedToPlayException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
                     }
+                } else {
+                    System.out.println("Can not click this ads");
                 }
                 // driver.close();
             } else {
@@ -178,42 +180,19 @@ public class MainScript {
         }
     };
 
+    private boolean canClick(Integer totalAds, Integer clickedAds) {
+        if (clickedAds == 0 && totalAds == 0)
+            return true;
+        else return (float) clickedAds / totalAds < 0.1;
+    }
+
     public static void main(String[] args) {
+        WebDriver driver = DriverUtil.initChrome();
+        GoogleScenario googleScenario = new GoogleScenario(driver);
+        YouTubeScenario youtubeScenario = new YouTubeScenario(driver);
+        MainScript mainScript = new MainScript(googleScenario, youtubeScenario);
 
-        String url = "jdbc:mysql://10.240.190.1:3306/cms";
-        String user = "aichat";
-        String pass = "signalchat@2019";
+        mainScript.playScenario3();
 
-        Jdbi jdbi = Jdbi.create(url, user, pass);
-
-        FaultTolerantDatabase database = new FaultTolerantDatabase("youtube", jdbi, new CircuitBreakerConfiguration());
-        Accounts accounts = new Accounts(database);
-        List<Banner> banners = accounts.getBanners(8);
-        for (Banner banner : banners){
-            System.out.println(new Gson().toJson(banner));
-        }
-
-        // for (int i = 0; i < 2; i++) {
-//        WebDriver driver = DriverUtil.initChrome();
-//        GoogleScenario googleScenario = new GoogleScenario(driver);
-//        YouTubeScenario youtubeScenario = new YouTubeScenario(driver);
-//        MainScript mainScript = new MainScript(googleScenario, youtubeScenario);
-//
-//        mainScript.playScenario3();
-
-        // driver.quit();
-        // }
-
-        // for( int i = 0; i < 2; i++) {
-        // for (String url : TEST_URLS) {
-        // try {
-        // youtubeScenario.openLink(url);
-        // } catch (YouTubeFailedToPlayException e) {
-        // // TODO Auto-generated catch block
-        // e.printStackTrace();
-        // continue;
-        // }
-        // }
-        // }
     }
 }

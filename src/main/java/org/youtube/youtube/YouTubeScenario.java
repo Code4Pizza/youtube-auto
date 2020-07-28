@@ -31,17 +31,17 @@ public class YouTubeScenario {
 //		findingAds();
 
 		System.out.println("Open url " + url);
-//		long duration = DEFAULT_DELAY;
-//		long timeToTakeActions = 0;
+		long duration = DEFAULT_DELAY;
+		long timeToTakeActions = 0;
 		driver.get(url);
 		attempToPlay();
-//		duration = getVideoDuration();
+		duration = getVideoDuration();
 
-//		long startAction = System.currentTimeMillis();
-//		attempToLike();
-//		attempToSubscribe();
-//		timeToTakeActions = System.currentTimeMillis() - startAction;
-//		System.out.println("Time to attemp like and sub " + timeToTakeActions);
+		long startAction = System.currentTimeMillis();
+		attempToLike();
+		attempToSubscribe();
+		timeToTakeActions = System.currentTimeMillis() - startAction;
+		System.out.println("Time to attemp like and sub " + timeToTakeActions);
 
 		try {
 //			Thread.sleep(duration - timeToTakeActions);

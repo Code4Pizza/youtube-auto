@@ -30,7 +30,7 @@ public class DriverUtil {
 
 	public static WebDriver initChrome() {
 		String path = System.getProperty("user.dir");
-		System.setProperty("webdriver.chrome.driver", path +"/src/main/resources/chromedriverOS");
+		System.setProperty("webdriver.chrome.driver", path +"/src/main/resources/chromedriver");
 
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments("--disable-blink-features");
