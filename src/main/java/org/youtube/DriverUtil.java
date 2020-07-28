@@ -8,6 +8,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,8 +60,9 @@ public class DriverUtil {
 //		desiredCapabilities.setCapability(ChromeOptions.CAPABILITY, options);
 
 //		ChromeDriver driver = new ChromeDriver(desiredCapabilities);
+		options.addExtensions(new File("/home/datvt/IdeaProjects/youtube-bot/youtube-auto/src/main/resources/proxy.zip"));
 		ChromeDriver driver = new ChromeDriver(options);
-		CookiesUtil.readCookies(driver);
+//		CookiesUtil.readCookies(driver);
 		return driver;
 	}
 
