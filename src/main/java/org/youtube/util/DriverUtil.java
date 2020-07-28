@@ -1,25 +1,21 @@
-package org.youtube;
+package org.youtube.util;
 
-import org.openqa.selenium.Proxy;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
 
 import java.io.File;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class DriverUtil {
 
     private static WebDriver driver;
 
-    private static String USER_AGENT;
-    private static String BROWSER;
-
+    public static ImmutablePair<String, String> userAgent;
 
     public static WebDriver getInstance() {
         if (driver == null) {
@@ -29,13 +25,14 @@ public class DriverUtil {
     }
 
     public static WebDriver initChrome() {
+        // Setup path driver
         String path = System.getProperty("user.dir");
-        System.setProperty("webdriver.chrome.driver", path + "/src/main/resources/chromedriver");
+        String os = OSUtil.getOSPrefix();
+        System.setProperty("webdriver.chrome.driver", path + "/src/main/resources/chromedriver_" + os);
 
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--disable-blink-features");
         options.addArguments("--disable-blink-features=AutomationControlled");
-
 
 //		ChromeOptions options = new ChromeOptions();
         options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
@@ -43,9 +40,11 @@ public class DriverUtil {
 
         Map<String, String> mapUA = UserAgentUtil.getRandomUserAgent();
 
-        BROWSER = mapUA.keySet().stream().findFirst().get();
-        USER_AGENT = mapUA.get(BROWSER);
-        System.out.println(USER_AGENT);
+        Optional<String> first = mapUA.keySet().stream().findFirst();
+        if (first.isPresent()) {
+            String browser = first.get();
+            userAgent = new ImmutablePair<>(browser, mapUA.get(browser));
+        }
 
 //		options.addArguments(String.format("--user-agent=%s", USER_AGENT));
 //		options.addArguments("--start-maximized");

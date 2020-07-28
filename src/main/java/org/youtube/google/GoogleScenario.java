@@ -1,115 +1,90 @@
 package org.youtube.google;
 
-import org.apache.commons.collections4.map.HashedMap;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.youtube.CommonUtil;
-import org.youtube.CookiesUtil;
-import org.youtube.GGAccount;
+import org.youtube.entities.YoutubeAccount;
+import org.youtube.util.CommonUtil;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import static java.util.Map.entry;
-
-import java.util.Collection;
-import java.util.Collections;
+import static org.youtube.util.Constants.DEFAULT_DELAY_SECOND;
+import static org.youtube.util.LogUtil.*;
 
 public class GoogleScenario {
 
+    public static final String GOOGLE_URL = "https://www.google.com/";
     public static final String GOOGLE_SIGN_IN_3RD_PARTY = "https://stackoverflow.com/users/login?ssrc=head&returnurl=https%3a%2f%2fstackoverflow.com%2f";
 
-    private WebDriver driver;
+    private final WebDriver driver;
 
     public GoogleScenario(WebDriver driver) {
         this.driver = driver;
     }
 
-    public void goToGoogleSignInPage(boolean use3rdParty) throws GoogleException.GoogleSignInNotFoundException {
-        System.out.println("Attemp login");
-        if (use3rdParty) {
-            driver.get(GOOGLE_SIGN_IN_3RD_PARTY);
-            By googleButton = By.className("s-btn__google");
-            WebDriverWait wait = new WebDriverWait(driver, 5);
-            wait.until(ExpectedConditions.elementToBeClickable(googleButton));
-            if (driver.findElement(googleButton) != null) {
-                CommonUtil.pause(1);
-                driver.findElement(googleButton).click();
-            } else {
-                throw new GoogleException.GoogleSignInNotFoundException();
-            }
+    public void goGoogleSignInPage() throws GoogleException.GoogleSignInNotFoundException {
+        info("Go to google page");
+        driver.get(GOOGLE_URL);
+        WebElement signInButton = driver.findElement(By.id("gb_70"));
+        if (signInButton != null) {
+            CommonUtil.pause(1);
+            signInButton.click();
         } else {
-            driver.get("https://www.google.com/");
-            WebElement signInButton = driver.findElement(By.id("gb_70"));
-            if (signInButton != null) {
-                CommonUtil.pause(1);
-                signInButton.click();
-            } else {
-                throw new GoogleException.GoogleSignInNotFoundException();
-            }
+            throw new GoogleException.GoogleSignInNotFoundException();
         }
     }
 
-    public void attempToSignOutGoogle() throws GoogleException.GoogleSignOutNotFoundException {
-        // Need some cool down for syncing google user sign in
-        CommonUtil.pause(5);
-
-        driver.get("https://www.google.com/");
-
-        try {
-            By avatarButton = By.className("gb_Ua");
-            WebDriverWait wait = new WebDriverWait(driver, 5);
-            wait.until(ExpectedConditions.elementToBeClickable(avatarButton));
-            driver.findElement(avatarButton).click();
-
-            By signOutButton = By.id("gb_71");
-            WebDriverWait waitSignOut = new WebDriverWait(driver, 5);
-            waitSignOut.until(ExpectedConditions.elementToBeClickable(signOutButton));
-            driver.findElement(signOutButton).click();
-
-        } catch (RuntimeException e) {
-            throw new GoogleException.GoogleSignOutNotFoundException();
+    public void goGoogleSignInPageThrough3rdParty() throws GoogleException.GoogleSignInNotFoundException {
+        info("Signing in google through 3rd party");
+        driver.get(GOOGLE_SIGN_IN_3RD_PARTY);
+        By googleButton = By.className("s-btn__google");
+        WebDriverWait wait = new WebDriverWait(driver, DEFAULT_DELAY_SECOND);
+        wait.until(ExpectedConditions.elementToBeClickable(googleButton));
+        if (driver.findElement(googleButton) != null) {
+            CommonUtil.pause(1);
+            driver.findElement(googleButton).click();
+        } else {
+            throw new GoogleException.GoogleSignInNotFoundException();
         }
     }
 
-    public void attempToLoginGoogle(GGAccount account)
-            throws GoogleException.GoogleInputLoginNotFoundException, GoogleException.GoogleSignInNotFoundException {
+    public void attemptToLogin(YoutubeAccount account) throws GoogleException {
+        info("Signing in email " + account.getEmail() + " ...");
+
         // Waiting page finish animation
         CommonUtil.pause(2);
 
         By ip = By.className("whsOnd");
         By next = By.className("VfPpkd-RLmnJb");
 
-        WebElement input = null;
-        WebElement nextButton = null;
+        WebElement input;
+        WebElement nextButton;
 
         try {
-            WebDriverWait wait = new WebDriverWait(driver, 5);
+            WebDriverWait wait = new WebDriverWait(driver, DEFAULT_DELAY_SECOND);
             wait.until(ExpectedConditions.elementToBeClickable(ip));
             wait.until(ExpectedConditions.elementToBeClickable(next));
             input = driver.findElement(ip);
             nextButton = driver.findElement(next);
         } catch (RuntimeException e) {
-            System.out.println("Moved to account chooser panel");
-            // Moved to account chooser panel
-            // Needed to click "Using another account button"
-            List<WebElement> tags = driver.findElements(By.className("lCoei"));
-            for (WebElement f : tags) {
-                if (f.getAttribute("jsname") != null && "rwl3qc".equals(f.getAttribute("jsname"))) {
-                    System.out.println("Found button switch account");
-                    f.click();
-                    // Waiting page finish animation
-                    CommonUtil.pause(2);
-                    break;
-                }
-            }
+            warning("Multiple account chooser showing");
 
+            Map<String, String> attrs = Collections.singletonMap("jsname", "rwl3qc");
+            WebElement eSwitchAccount = CommonUtil.waitElement(driver, By.className("lCoei"), attrs);
+            if (eSwitchAccount != null) {
+                info("Click button using another account");
+                CommonUtil.click(eSwitchAccount);
+                // Waiting page finish animation
+                CommonUtil.pause(2);
+            } else {
+                throw new GoogleException("Button using another account not found");
+            }
+            // Try to find input again
             input = driver.findElement(ip);
             nextButton = driver.findElement(next);
         }
@@ -119,103 +94,146 @@ public class GoogleScenario {
         }
 
         if ("username".equals(input.getAttribute("autocomplete"))) {
-            CommonUtil.pause(2);
             CommonUtil.enterKeys(input, account.getEmail());
             nextButton.click();
+        } else {
+            severe("Input email not found");
+            throw new GoogleException.GoogleInputLoginNotFoundException();
         }
 
         // Waiting page finish animation
         CommonUtil.pause(2);
 
-        try {
-            nextButton = driver.findElement(By.className("VfPpkd-RLmnJb"));
-            input = driver.findElement(By.className("whsOnd"));
-        } catch (NoSuchElementException e) {
-            // Meet message "This browser or app may not be secure"
-            // Fallback to 3rd party sign in
-            goToGoogleSignInPage(true);
-            attempToLoginGoogle(account);
-            return;
-        }
+        nextButton = CommonUtil.waitElement(driver, By.className("VfPpkd-RLmnJb"), null);
+        input = CommonUtil.waitElement(driver, By.className("whsOnd"), null);
+//        try {
+//            nextButton = driver.findElement(By.className("VfPpkd-RLmnJb"));
+//            input = driver.findElement(By.className("whsOnd"));
+//        } catch (NoSuchElementException e) {
+//            // Meet message "This browser or app may not be secure"
+//            // Fallback to 3rd party sign in if proxy provide access domain 3rd party or skip
+//            throw new GoogleException("This browser or app may not be secure");
+//        }
 
         if (nextButton == null || input == null) {
-            throw new GoogleException.GoogleInputLoginNotFoundException();
+            throw new GoogleException.GoogleDetectInsecureBrowserException();
         }
 
         if ("current-password".equals(input.getAttribute("autocomplete"))) {
-            CommonUtil.pause(2);
             CommonUtil.enterKeys(input, account.getPassword());
             nextButton.click();
+        } else {
+            severe("Input password not found");
+            throw new GoogleException.GoogleInputLoginNotFoundException();
         }
 
         CommonUtil.pause(2);
 
         // Check if account need backup email confirmation
-        By buttons = By.className("vxx8jf");
-        List<WebElement> elements = driver.findElements(buttons);
-        System.out.println("Size of elements : " + elements.size());
-        WebElement e = elements.get(0);
-        if (e.getText() != null) {
-            System.out.println("Found confirm backup");
-            e.click();
+        WebElement eConfirmBackup = CommonUtil.waitElement(driver, By.className("vxx8jf"), null);
+        if (eConfirmBackup != null && !eConfirmBackup.getText().isEmpty()) {
+            info("Google showing confirm backup email panel");
+            eConfirmBackup.click();
+
+            WebElement eBackupInput = CommonUtil.waitElement(driver, By.id("knowledge-preregistered-email-response"), null);
+            if (eBackupInput != null) {
+                CommonUtil.enterKeys(eBackupInput, account.getBackupEmail());
+            } else {
+                throw new GoogleException("Input backup email not found");
+            }
+
+            WebElement eNextStep = CommonUtil.waitElement(driver, By.className("VfPpkd-RLmnJb"), null);
+            if (eNextStep != null) {
+                eNextStep.click();
+            } else {
+                throw new GoogleException("Entered backup email, next step button not found");
+            }
+
             CommonUtil.pause(2);
-
-            WebElement backupElement = driver.findElement(By.id("knowledge-preregistered-email-response"));
-//				backupElement.sendKeys(account.getBackup());
-            CommonUtil.enterKeys(backupElement, account.getBackup());
-            By byNext = By.className("VfPpkd-RLmnJb");
-            driver.findElement(byNext).click();
-
-            CommonUtil.pause(2);
-
-            By bySkip = By.className("snByac");
-            List<WebElement> skipElements = driver.findElements(bySkip);
-
-            for (WebElement s : skipElements) {
-                if ("Để sau".equals(s.getText()) || "ĐỂ SAU".equals(s.getText())) {
-                    System.out.println("Found skip button");
-                    s.click();
-                    break;
-                }
+            WebElement eSkipButton = CommonUtil.waitElement(driver, By.className("snByac"), null);
+            if (eSkipButton != null) {
+                eSkipButton.click();
+            } else {
+                throw new GoogleException("Entered backup email, skip button not found");
             }
         }
+        info("Account " + account.getEmail() + " successfully signed in");
 
-        CommonUtil.pause(2);
-//		System.out.println("Writting cookies");
+//		System.out.println("Writing cookies");
 //		CookiesUtil.writeCookies(driver);
     }
 
-    public void checkReviewActivity() {
-        WebElement reviewButton = CommonUtil.findByClassAndAttrs(driver, "gb_zd",
-                Map.ofEntries(entry("role", "button"), entry("tabindex", "0")));
+    public void attemptSignOut() throws GoogleException {
+        // Need some cool down for syncing google user sign in
+        CommonUtil.pause(3);
 
-        CommonUtil.pause(1);
-        if (reviewButton == null) {
-            System.out.println("Not found review activity button");
-            return;
-        }
-        reviewButton.click();
+        info("Signing out...");
+        driver.navigate().to(GOOGLE_URL);
 
-        WebElement notificationButton = CommonUtil.waitElement(driver, "PfHrIe",
-                Map.ofEntries(entry("jsname", "cDqwkb")));
-        CommonUtil.pause(1);
-        if (notificationButton == null) {
-            System.out.println("Not found notification button");
-            return;
-        }
-        notificationButton.click();
+        WebElement eAvatar = CommonUtil.waitElement(driver, By.className("gb_Ua"), null);
+        if (eAvatar != null) {
+            CommonUtil.click(eAvatar);
 
-        WebElement confirmButton = CommonUtil.waitElement(driver, "VfPpkd-LgbsSe",
-                Map.ofEntries(entry("jsname", "j6LnYe")));
-        CommonUtil.pause(1);
-        if (confirmButton == null) {
-            System.out.println("Not found confirm button");
-            return;
+            WebElement eSignOutButton = CommonUtil.waitElement(driver, By.id("gb_71"), null);
+            if (eSignOutButton != null) {
+                CommonUtil.click(eSignOutButton);
+            } else {
+                throw new GoogleException.GoogleSignOutNotFoundException();
+            }
+        } else {
+            throw new GoogleException("Sign out, avatar button not found");
         }
-        confirmButton.click();
+//        try {
+//            By avatarButton = By.className("gb_Ua");
+//            WebDriverWait wait = new WebDriverWait(driver, 5);
+//            wait.until(ExpectedConditions.elementToBeClickable(avatarButton));
+//            driver.findElement(avatarButton).click();
+//
+//            By signOutButton = By.id("gb_71");
+//            WebDriverWait waitSignOut = new WebDriverWait(driver, 5);
+//            waitSignOut.until(ExpectedConditions.elementToBeClickable(signOutButton));
+//            driver.findElement(signOutButton).click();
+//
+//        } catch (RuntimeException e) {
+//            throw new GoogleException.GoogleSignOutNotFoundException();
+//        }
     }
 
-    public void attempToSignOutYouTube() throws GoogleException.GoogleSignOutNotFoundException {
+    public void checkReviewActivity() {
+//        Map<String, String> attrs = new HashMap<>();
+//        attrs.put("role", "button");
+//        attrs.put("tabindex", "0");
+//        WebElement reviewButton = CommonUtil.findByClassAndAttrs(driver, "gb_zd", attrs);
+//
+//        CommonUtil.pause(1);
+//        if (reviewButton == null) {
+//            System.out.println("Not found review activity button");
+//            return;
+//        }
+//        reviewButton.click();
+//
+//        attrs = Collections.singletonMap("jsname", "cDqwkb");
+//        WebElement notificationButton = CommonUtil.waitElement(driver, "PfHrIe", attrs);
+//
+//        CommonUtil.pause(1);
+//        if (notificationButton == null) {
+//            System.out.println("Not found notification button");
+//            return;
+//        }
+//        notificationButton.click();
+//
+//        attrs = Collections.singletonMap("jsname", "j6LnYe");
+//        WebElement confirmButton = CommonUtil.waitElement(driver, "VfPpkd-LgbsSe", attrs);
+//
+//        CommonUtil.pause(1);
+//        if (confirmButton == null) {
+//            System.out.println("Not found confirm button");
+//            return;
+//        }
+//        confirmButton.click();
+    }
+
+    public void attemptToSignOutYouTube() throws GoogleException.GoogleSignOutNotFoundException {
         CommonUtil.pause(10);
 
         driver.get("https://www.youtube.com/");

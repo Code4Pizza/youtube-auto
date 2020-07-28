@@ -1,4 +1,4 @@
-package org.youtube;
+package org.youtube.util;
 
 import java.util.Collections;
 import java.util.HashMap;

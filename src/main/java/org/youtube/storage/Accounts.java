@@ -20,17 +20,22 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SharedMetricRegistries;
 import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jdbi.v3.core.statement.PreparedBatch;
+import org.jdbi.v3.core.transaction.TransactionIsolationLevel;
 import org.youtube.entities.YoutubeAccount;
 import org.youtube.storage.mappers.YoutubeAccountRowMapper;
 import org.youtube.util.Constants;
 import org.youtube.util.SystemMapper;
 
-import java.util.Date;
 import java.util.List;
 
 import static com.codahale.metrics.MetricRegistry.name;
 
 public class Accounts {
+
+    public static final String SQL_INSERT = "INSERT INTO yt_bot.youtube_accounts" +
+            "(email, password, backup_email)" +
+            "VALUES(:email, :password, :backup_email);";
 
     private static final ObjectMapper mapper = SystemMapper.getMapper();
 
@@ -38,18 +43,17 @@ public class Accounts {
 
     private final Timer getAllAccountsTimer = metricRegistry.timer(name(Accounts.class, "getAllAccounts"));
 
+    private final Timer insertsAccountsTimer = metricRegistry.timer(name(Accounts.class, "insertAccounts"));
 
     private final FaultTolerantDatabase database;
 
     public Accounts(FaultTolerantDatabase database) {
         this.database = database;
         this.database.getDatabase().registerRowMapper(new YoutubeAccountRowMapper());
-
     }
 
-
     public List<YoutubeAccount> getAllAccounts() {
-        String sql = "SELECT * from yt_bot.youtube_accounts";
+        String sql = "SELECT * from yt_bot.youtube_accounts where enable = 0";
 
         return database.with(jdbi -> jdbi.withHandle(handle -> {
             try (Timer.Context ignored = getAllAccountsTimer.time()) {
@@ -60,4 +64,37 @@ public class Accounts {
         }));
     }
 
+    public boolean insertAccount(YoutubeAccount account) {
+        return database.with(jdbi -> jdbi.withHandle(handle -> {
+            try (Timer.Context ignored = getAllAccountsTimer.time()) {
+                return handle.createUpdate(SQL_INSERT)
+                        .bind("email", account.getEmail())
+                        .bind("password", account.getPassword())
+                        .bind("backup_email", account.getBackupEmail())
+                        .bind("enable", account.getEnable())
+                        .execute() > 0;
+            }
+        }));
+    }
+
+    public void bulkInsertAccounts(List<YoutubeAccount> accounts) {
+        database.use(jdbi -> jdbi.useTransaction(TransactionIsolationLevel.SERIALIZABLE, handle -> {
+            try (Timer.Context ignored = insertsAccountsTimer.time()) {
+                PreparedBatch preparedBatch = handle.prepareBatch(SQL_INSERT);
+
+                for (YoutubeAccount account : accounts) {
+                    preparedBatch
+                            .bind("email", account.getEmail())
+                            .bind("password", account.getPassword())
+                            .bind("backup_email", account.getBackupEmail())
+                            .bind("enable", account.getEnable())
+                            .add();
+                }
+
+                if (preparedBatch.size() > 0) {
+                    preparedBatch.execute();
+                }
+            }
+        }));
+    }
 }

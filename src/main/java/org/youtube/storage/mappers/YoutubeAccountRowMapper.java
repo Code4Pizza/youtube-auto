@@ -14,6 +14,7 @@ public class YoutubeAccountRowMapper implements RowMapper<YoutubeAccount> {
     return new YoutubeAccount(resultSet.getInt("id"),
             resultSet.getString("email"),
             resultSet.getString("password"),
-            resultSet.getString("backup_email"));
+            resultSet.getString("backup_email"),
+            resultSet.getInt("enable"));
   }
 }
