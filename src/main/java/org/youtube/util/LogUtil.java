@@ -9,11 +9,11 @@ public class LogUtil {
 
     private static final Logger logger = Logger.getLogger("");
 
-    public static void init() {
+    public static void init(String logName) {
         try {
             // This block configure the logger with handler and formatter
             String path = System.getProperty("user.dir");
-            FileHandler fh = new FileHandler(path + "/log.txt");
+            FileHandler fh = new FileHandler(path + "/" + logName + ".txt");
             logger.addHandler(fh);
             SimpleFormatter formatter = new SimpleFormatter();
             fh.setFormatter(formatter);

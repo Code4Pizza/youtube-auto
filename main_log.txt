@@ -1,0 +1,176 @@
+Jul 31, 2020 1:10:06 AM org.youtube.util.LogUtil info
+INFO: Thread[main,5,main]Init log message
+Jul 31, 2020 1:10:08 AM org.youtube.util.LogUtil info
+INFO: Thread[main,5,main]Total number accounts is 1
+Jul 31, 2020 1:10:12 AM org.openqa.selenium.remote.ProtocolHandshake createSession
+INFO: Detected dialect: W3C
+Jul 31, 2020 1:10:12 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-1,5,main]==================Start of acc ==================
+Jul 31, 2020 1:10:12 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-1,5,main]Signing in google through 3rd party
+Jul 31, 2020 1:10:15 AM org.openqa.selenium.remote.ProtocolHandshake createSession
+INFO: Detected dialect: W3C
+Jul 31, 2020 1:10:16 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-2,5,main]==================Start of acc ==================
+Jul 31, 2020 1:10:16 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-2,5,main]Signing in google through 3rd party
+Jul 31, 2020 1:10:19 AM org.openqa.selenium.remote.ProtocolHandshake createSession
+INFO: Detected dialect: W3C
+Jul 31, 2020 1:10:19 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-3,5,main]==================Start of acc ==================
+Jul 31, 2020 1:10:19 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-3,5,main]Signing in google through 3rd party
+Jul 31, 2020 1:10:22 AM org.openqa.selenium.remote.ProtocolHandshake createSession
+INFO: Detected dialect: W3C
+Jul 31, 2020 1:10:23 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-4,5,main]==================Start of acc ==================
+Jul 31, 2020 1:10:23 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-4,5,main]Signing in google through 3rd party
+Jul 31, 2020 1:10:27 AM org.openqa.selenium.remote.ProtocolHandshake createSession
+INFO: Detected dialect: W3C
+Jul 31, 2020 1:10:27 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-5,5,main]==================Start of acc ==================
+Jul 31, 2020 1:10:27 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-5,5,main]Signing in google through 3rd party
+Jul 31, 2020 1:10:30 AM org.openqa.selenium.remote.ProtocolHandshake createSession
+INFO: Detected dialect: W3C
+Jul 31, 2020 1:10:33 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-1,5,main]Signing in email  ...
+Jul 31, 2020 1:10:34 AM org.openqa.selenium.remote.ProtocolHandshake createSession
+INFO: Detected dialect: W3C
+Jul 31, 2020 1:10:36 AM org.youtube.util.LogUtil severe
+SEVERE: Thread[pool-1-thread-1,5,main]Browser suspend unexpectedly, chrome not reachable
+  (Session info: chrome=84.0.4147.105)
+Build info: version: '3.141.59', revision: 'e82be7d358', time: '2018-11-14T08:17:03'
+System info: host: 'TheAnh.local', ip: 'fe80:0:0:0:14fb:356f:e4ab:c317%en0', os.name: 'Mac OS X', os.arch: 'x86_64', os.version: '10.15.5', java.version: '12.0.1'
+Driver info: org.openqa.selenium.chrome.ChromeDriver
+Capabilities {acceptInsecureCerts: false, browserName: chrome, browserVersion: 84.0.4147.105, chrome: {chromedriverVersion: 84.0.4147.30 (48b3e868b4cc0..., userDataDir: /var/folders/24/m5phsrh17z7...}, goog:chromeOptions: {debuggerAddress: localhost:56452}, javascriptEnabled: true, networkConnectionEnabled: false, pageLoadStrategy: normal, platform: MAC, platformName: MAC, proxy: Proxy(), setWindowRect: true, strictFileInteractability: false, timeouts: {implicit: 0, pageLoad: 300000, script: 30000}, unhandledPromptBehavior: dismiss and notify, webauthn:virtualAuthenticators: true}
+Session ID: 7140ed5dffe19e008218f3e5ae95de34
+Jul 31, 2020 1:10:36 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-1,5,main]==================End of acc ==================
+Jul 31, 2020 1:10:37 AM org.openqa.selenium.remote.ProtocolHandshake createSession
+INFO: Detected dialect: W3C
+Jul 31, 2020 1:10:37 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-1,5,main]==================Start of acc ==================
+Jul 31, 2020 1:10:37 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-1,5,main]Signing in google through 3rd party
+Jul 31, 2020 1:10:37 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-2,5,main]Signing in email  ...
+Jul 31, 2020 1:10:39 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-3,5,main]Signing in email  ...
+Jul 31, 2020 1:10:40 AM org.openqa.selenium.remote.ProtocolHandshake createSession
+INFO: Detected dialect: W3C
+Jul 31, 2020 1:10:43 AM org.openqa.selenium.remote.ProtocolHandshake createSession
+INFO: Detected dialect: W3C
+Jul 31, 2020 1:10:44 AM org.youtube.util.LogUtil warning
+WARNING: Thread[pool-1-thread-2,5,main]Multiple account chooser showing
+Jul 31, 2020 1:10:45 AM org.youtube.util.LogUtil severe
+SEVERE: Thread[pool-1-thread-5,5,main]Browser suspend unexpectedly, Expected condition failed: waiting for element to be clickable: By.className: s-btn__google (tried for 5 second(s) with 500 milliseconds interval)
+Jul 31, 2020 1:10:45 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-5,5,main]==================End of acc ==================
+Jul 31, 2020 1:10:46 AM org.youtube.util.LogUtil warning
+WARNING: Thread[pool-1-thread-3,5,main]Multiple account chooser showing
+Jul 31, 2020 1:10:46 AM org.openqa.selenium.remote.ProtocolHandshake createSession
+INFO: Detected dialect: W3C
+Jul 31, 2020 1:10:46 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-5,5,main]==================Start of acc ==================
+Jul 31, 2020 1:10:46 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-5,5,main]Signing in google through 3rd party
+Jul 31, 2020 1:10:48 AM org.youtube.util.LogUtil severe
+SEVERE: Thread[pool-1-thread-1,5,main]Browser suspend unexpectedly, Expected condition failed: waiting for element to be clickable: By.className: s-btn__google (tried for 5 second(s) with 500 milliseconds interval)
+Jul 31, 2020 1:10:48 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-1,5,main]==================End of acc ==================
+Jul 31, 2020 1:10:49 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-1,5,main]==================Start of acc Dibdskbskzhsislnxlsnxkcnnzkbx@gmail.com==================
+Jul 31, 2020 1:10:49 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-1,5,main]Signing in google through 3rd party
+Jul 31, 2020 1:10:49 AM org.youtube.util.LogUtil severe
+SEVERE: Thread[pool-1-thread-1,5,main]Browser suspend unexpectedly, chrome not reachable
+  (Session info: chrome=84.0.4147.105)
+Build info: version: '3.141.59', revision: 'e82be7d358', time: '2018-11-14T08:17:03'
+System info: host: 'TheAnh.local', ip: 'fe80:0:0:0:14fb:356f:e4ab:c317%en0', os.name: 'Mac OS X', os.arch: 'x86_64', os.version: '10.15.5', java.version: '12.0.1'
+Driver info: org.openqa.selenium.chrome.ChromeDriver
+Capabilities {acceptInsecureCerts: false, browserName: chrome, browserVersion: 84.0.4147.105, chrome: {chromedriverVersion: 84.0.4147.30 (48b3e868b4cc0..., userDataDir: /var/folders/24/m5phsrh17z7...}, goog:chromeOptions: {debuggerAddress: localhost:56632}, javascriptEnabled: true, networkConnectionEnabled: false, pageLoadStrategy: normal, platform: MAC, platformName: MAC, proxy: Proxy(), setWindowRect: true, strictFileInteractability: false, timeouts: {implicit: 0, pageLoad: 300000, script: 30000}, unhandledPromptBehavior: dismiss and notify, webauthn:virtualAuthenticators: true}
+Session ID: f5ea898ed4d986309b6c1d8de85927d0
+Jul 31, 2020 1:10:49 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-1,5,main]==================End of acc Dibdskbskzhsislnxlsnxkcnnzkbx@gmail.com==================
+Jul 31, 2020 1:10:49 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-4,5,main]Signing in email  ...
+Jul 31, 2020 1:10:50 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-1,5,main]==================Start of acc ==================
+Jul 31, 2020 1:10:50 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-1,5,main]Signing in google through 3rd party
+Jul 31, 2020 1:10:50 AM org.youtube.util.LogUtil severe
+SEVERE: Thread[pool-1-thread-1,5,main]Browser suspend unexpectedly, chrome not reachable
+  (Session info: chrome=84.0.4147.105)
+Build info: version: '3.141.59', revision: 'e82be7d358', time: '2018-11-14T08:17:03'
+System info: host: 'TheAnh.local', ip: 'fe80:0:0:0:14fb:356f:e4ab:c317%en0', os.name: 'Mac OS X', os.arch: 'x86_64', os.version: '10.15.5', java.version: '12.0.1'
+Driver info: org.openqa.selenium.chrome.ChromeDriver
+Capabilities {acceptInsecureCerts: false, browserName: chrome, browserVersion: 84.0.4147.105, chrome: {chromedriverVersion: 84.0.4147.30 (48b3e868b4cc0..., userDataDir: /var/folders/24/m5phsrh17z7...}, goog:chromeOptions: {debuggerAddress: localhost:56661}, javascriptEnabled: true, networkConnectionEnabled: false, pageLoadStrategy: normal, platform: MAC, platformName: MAC, proxy: Proxy(), setWindowRect: true, strictFileInteractability: false, timeouts: {implicit: 0, pageLoad: 300000, script: 30000}, unhandledPromptBehavior: dismiss and notify, webauthn:virtualAuthenticators: true}
+Session ID: e9882cb4728a9c2a35088a656cd9e6bc
+Jul 31, 2020 1:10:50 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-1,5,main]==================End of acc ==================
+Jul 31, 2020 1:10:51 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-1,5,main]==================Start of acc ==================
+Jul 31, 2020 1:10:51 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-1,5,main]Signing in google through 3rd party
+Jul 31, 2020 1:10:52 AM org.youtube.util.LogUtil severe
+SEVERE: Thread[pool-1-thread-2,5,main]Button using another account not found
+Jul 31, 2020 1:10:52 AM org.youtube.util.LogUtil warning
+WARNING: Thread[pool-1-thread-2,5,main]Skip account 
+Jul 31, 2020 1:10:52 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-2,5,main]==================End of acc ==================
+Jul 31, 2020 1:10:54 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-2,5,main]==================Start of acc ==================
+Jul 31, 2020 1:10:54 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-2,5,main]Signing in google through 3rd party
+Jul 31, 2020 1:10:54 AM org.youtube.util.LogUtil severe
+SEVERE: Thread[pool-1-thread-2,5,main]Browser suspend unexpectedly, chrome not reachable
+  (Session info: chrome=84.0.4147.105)
+Build info: version: '3.141.59', revision: 'e82be7d358', time: '2018-11-14T08:17:03'
+System info: host: 'TheAnh.local', ip: 'fe80:0:0:0:14fb:356f:e4ab:c317%en0', os.name: 'Mac OS X', os.arch: 'x86_64', os.version: '10.15.5', java.version: '12.0.1'
+Driver info: org.openqa.selenium.chrome.ChromeDriver
+Capabilities {acceptInsecureCerts: false, browserName: chrome, browserVersion: 84.0.4147.105, chrome: {chromedriverVersion: 84.0.4147.30 (48b3e868b4cc0..., userDataDir: /var/folders/24/m5phsrh17z7...}, goog:chromeOptions: {debuggerAddress: localhost:56722}, javascriptEnabled: true, networkConnectionEnabled: false, pageLoadStrategy: normal, platform: MAC, platformName: MAC, proxy: Proxy(), setWindowRect: true, strictFileInteractability: false, timeouts: {implicit: 0, pageLoad: 300000, script: 30000}, unhandledPromptBehavior: dismiss and notify, webauthn:virtualAuthenticators: true}
+Session ID: 34e269c4175cb65e71d95ada3b315686
+Jul 31, 2020 1:10:54 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-2,5,main]==================End of acc ==================
+Jul 31, 2020 1:10:54 AM org.youtube.util.LogUtil severe
+SEVERE: Thread[pool-1-thread-3,5,main]Button using another account not found
+Jul 31, 2020 1:10:54 AM org.youtube.util.LogUtil warning
+WARNING: Thread[pool-1-thread-3,5,main]Skip account 
+Jul 31, 2020 1:10:54 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-3,5,main]==================End of acc ==================
+Jul 31, 2020 1:10:56 AM org.youtube.util.LogUtil warning
+WARNING: Thread[pool-1-thread-4,5,main]Multiple account chooser showing
+Jul 31, 2020 1:11:04 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-5,5,main]Signing in email  ...
+Jul 31, 2020 1:11:04 AM org.youtube.util.LogUtil severe
+SEVERE: Thread[pool-1-thread-4,5,main]Button using another account not found
+Jul 31, 2020 1:11:04 AM org.youtube.util.LogUtil warning
+WARNING: Thread[pool-1-thread-4,5,main]Skip account 
+Jul 31, 2020 1:11:04 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-4,5,main]==================End of acc ==================
+Jul 31, 2020 1:11:05 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-1,5,main]Signing in email  ...
+Jul 31, 2020 1:11:07 AM org.youtube.util.LogUtil warning
+WARNING: Thread[pool-1-thread-1,5,main]Multiple account chooser showing
+Jul 31, 2020 1:11:08 AM org.youtube.util.LogUtil severe
+SEVERE: Thread[pool-1-thread-1,5,main]Button using another account not found
+Jul 31, 2020 1:11:08 AM org.youtube.util.LogUtil warning
+WARNING: Thread[pool-1-thread-1,5,main]Skip account 
+Jul 31, 2020 1:11:08 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-1,5,main]==================End of acc ==================
+Jul 31, 2020 1:11:11 AM org.youtube.util.LogUtil warning
+WARNING: Thread[pool-1-thread-5,5,main]Multiple account chooser showing
+Jul 31, 2020 1:11:19 AM org.youtube.util.LogUtil severe
+SEVERE: Thread[pool-1-thread-5,5,main]Button using another account not found
+Jul 31, 2020 1:11:19 AM org.youtube.util.LogUtil warning
+WARNING: Thread[pool-1-thread-5,5,main]Skip account 
+Jul 31, 2020 1:11:19 AM org.youtube.util.LogUtil info
+INFO: Thread[pool-1-thread-5,5,main]==================End of acc ==================
+Jul 31, 2020 1:11:19 AM org.youtube.util.LogUtil info
+INFO: Thread[main,5,main]Main Scenario finished
+Jul 31, 2020 1:11:19 AM org.youtube.util.LogUtil info
+INFO: Thread[main,5,main]Total attempt 11
+Jul 31, 2020 1:11:19 AM org.youtube.util.LogUtil info
+INFO: Thread[main,5,main]Number failed acc 5

@@ -1,19 +1,16 @@
 package org.youtube.util;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
 
 import java.io.File;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 
 public class DriverUtil {
 
@@ -65,7 +62,9 @@ public class DriverUtil {
 //		desiredCapabilities.setCapability(ChromeOptions.CAPABILITY, options);
 
 //		ChromeDriver driver = new ChromeDriver(desiredCapabilities);
-        options.addExtensions(new File(path + "/src/main/resources/proxy.zip"));
+        String fullPath = path + "/src/main/resources/proxy_" + new Random().nextInt(3) + ".zip";
+        LogUtil.warning("Full path proxy" + fullPath);
+        options.addExtensions(new File(fullPath));
         ChromeDriver driver = new ChromeDriver(options);
         driver.manage().window().maximize();
 //		CookiesUtil.readCookies(driver);
@@ -89,5 +88,4 @@ public class DriverUtil {
             driver.quit();
         }
     }
-
 }

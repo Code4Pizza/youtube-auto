@@ -49,7 +49,7 @@ public class YoutubeAccount {
     }
 
     public String getEmail() {
-        return email;
+        return email.isEmpty() ? "Fake" : email;
     }
 
     public void setEmail(String email) {
@@ -78,5 +78,18 @@ public class YoutubeAccount {
 
     public void setEnable(int enable) {
         this.enable = enable;
+    }
+
+    public boolean isFake() {
+        return enable == 1;
+    }
+
+    public static YoutubeAccount createFakeAccount() {
+        YoutubeAccount youtubeAccount = new YoutubeAccount();
+        youtubeAccount.email = "";
+        youtubeAccount.password = "";
+        youtubeAccount.backupEmail = "";
+        youtubeAccount.enable = 1;
+        return youtubeAccount;
     }
 }

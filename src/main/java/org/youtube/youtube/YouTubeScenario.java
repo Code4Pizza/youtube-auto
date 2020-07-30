@@ -18,17 +18,12 @@ public class YouTubeScenario {
 
     private static final Logger logger = LoggerFactory.getLogger(YouTubeScenario.class);
 
-
     public static final long DEFAULT_DELAY = 600000;
 
     private final WebDriver driver;
 
     public YouTubeScenario(WebDriver driver) {
         this.driver = driver;
-    }
-
-    public void go(String url) {
-        driver.get(url);
     }
 
     public void openLink(ChannelVideo video) {
@@ -54,14 +49,10 @@ public class YouTubeScenario {
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } finally {
-//			if (adThread != null) {
-//				adThread.interrupt();
-//			}
         }
     }
 
-    public void attempToPlay() throws YouTubeException.YouTubeFailedToPlayException {
+    public void attemptToPlay() throws YouTubeException.YouTubeFailedToPlayException {
         try {
             WebDriverWait wait = new WebDriverWait(driver, 5);
             wait.until(ExpectedConditions.elementToBeClickable(By.className("ytp-play-button")));
