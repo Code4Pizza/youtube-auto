@@ -1,20 +1,18 @@
 package org.youtube;
 
-import org.jdbi.v3.core.Jdbi;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
-import org.youtube.configuration.CircuitBreakerConfiguration;
 import org.youtube.entities.ChannelVideo;
 import org.youtube.entities.YoutubeAccount;
 import org.youtube.entities.YoutubeChannel;
 import org.youtube.google.GoogleScenario;
 import org.youtube.storage.YoutubeDatabases;
-import org.youtube.storage.FaultTolerantDatabase;
 import org.youtube.util.CommonUtil;
 import org.youtube.util.DriverUtil;
 import org.youtube.util.LogUtil;
+import org.youtube.util.StorageUtil;
 import org.youtube.youtube.YouTubeException;
 import org.youtube.youtube.YouTubeScenario;
 
@@ -23,33 +21,43 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import static org.youtube.util.Constants.*;
 import static org.youtube.util.LogUtil.*;
 
 public class MainScript {
 
-    private final GoogleScenario googleScenario;
-    private final YouTubeScenario youtubeScenario;
     private final YoutubeDatabases youtubeDatabases;
 
-    public MainScript(GoogleScenario googleScenario, YouTubeScenario youtubeScenario, YoutubeDatabases youtubeDatabases) {
-        this.googleScenario = googleScenario;
-        this.youtubeScenario = youtubeScenario;
-        this.youtubeDatabases = youtubeDatabases;
-    }
-
+    private GoogleScenario googleScenario;
+    private YouTubeScenario youtubeScenario;
 
     private Thread adThread;
-
     private Integer totalAds = 0;
     private Integer clickedAds = 0;
 
+    public int numberAttempt = 0;
+    public int failedAccount = 0;
+
+    public MainScript(YoutubeDatabases youtubeDatabases) {
+        this.youtubeDatabases = youtubeDatabases;
+    }
+
     private void findingAds() {
-        adThread = new Thread(runable);
+        adThread = new Thread(runnable);
         adThread.start();
     }
 
-    private Runnable runable = new Runnable() {
+    private void stopFindingAds() {
+        if (adThread != null) {
+            adThread.interrupt();
+        }
+    }
+
+    private void resetCount() {
+        numberAttempt = 0;
+        failedAccount = 0;
+    }
+
+    private final Runnable runnable = new Runnable() {
 
         @Override
         public void run() {
@@ -147,7 +155,7 @@ public class MainScript {
                         CommonUtil.pause(1);
                         try {
                             youtubeScenario.attempToPlay();
-                           // dong quang cao nay lai
+                            // dong quang cao nay lai
                             WebElement skipButton = CommonUtil.waitElement(driver, "ytp-ad-overlay-close-button", null);
                             if (skipButton != null) {
                                 Actions actions = new Actions(driver);
@@ -183,33 +191,18 @@ public class MainScript {
         }
     }
 
-    public static YoutubeDatabases getAccDatabase() {
-        Jdbi jdbi = Jdbi.create(BASE_URL, USER_NAME, PASSWORD);
-        FaultTolerantDatabase accDatabase = new FaultTolerantDatabase(DB_NAME, jdbi, new CircuitBreakerConfiguration());
-        return new YoutubeDatabases(accDatabase);
-    }
-
-    public int numberAttempt = 0;
-    public int failedAccount = 0;
-
     public void playScenario4() {
         findingAds();
         numberAttempt = 0;
         failedAccount = 0;
         List<YoutubeAccount> youtubeAccounts = youtubeDatabases.getAllAccounts();
-        for (int i = 0 ; i < youtubeAccounts.size(); i++) {
+        for (int i = 0; i < youtubeAccounts.size(); i++) {
             info("Start run account number " + i);
             YoutubeAccount youtubeAccount = youtubeAccounts.get(i);
             try {
 //                googleScenario.goGoogleSignInPage();
                 googleScenario.goGoogleSignInPageThrough3rdParty();
                 googleScenario.attemptToLogin(youtubeAccount);
-
-                if (adThread != null) {
-                    System.out.println("Interupt Ads");
-                    adThread.interrupt();
-                }
-
 
                 List<YoutubeChannel> channels = youtubeDatabases.getAllChannels();
                 for (YoutubeChannel channel : channels) {
@@ -247,26 +240,76 @@ public class MainScript {
         }
     }
 
+    public void playMainScenario() {
+        resetCount();
+//        findingAds();
+        List<YoutubeAccount> youtubeAccounts = youtubeDatabases.getAllAccounts();
+        info("Total number accounts is " + youtubeAccounts.size());
+        for (int i = 0; i < youtubeAccounts.size(); i++) {
+            info("Start run account number " + i);
+            YoutubeAccount youtubeAccount = youtubeAccounts.get(i);
+
+            WebDriver driver = DriverUtil.initChrome();
+            GoogleScenario googleScenario = new GoogleScenario(driver);
+            YouTubeScenario youtubeScenario = new YouTubeScenario(driver);
+
+            try {
+                googleScenario.goGoogleSignInPageThrough3rdParty();
+                googleScenario.attemptToLogin(youtubeAccount);
+
+//                List<YoutubeChannel> channels = youtubeDatabases.getAllChannels();
+//                for (YoutubeChannel channel : channels) {
+//                    List<ChannelVideo> videos = youtubeDatabases.getAllChannelVideos(channel);
+//                    videos.forEach(video -> {
+//                        try {
+//                            youtubeScenario.openLink(video);
+//                        } catch (YouTubeException.YouTubeFailedToPlayException e) {
+//                            warning(e.getMessage());
+//                        }
+//                    });
+//                }
+
+//                googleScenario.attemptSignOut();
+
+            } catch (Exception e) {
+                if (e instanceof WebDriverException) {
+                    severe("Browser suspend unexpectedly, " + e.getMessage());
+                    break;
+                } else {
+                    severe(e.getMessage());
+                    warning("Skip account " + youtubeAccount.getEmail() + " number " + i);
+                    failedAccount++;
+                }
+            } finally {
+                numberAttempt++;
+                info("==================End of acc flow=================");
+                CommonUtil.pause(2);
+                driver.quit();
+            }
+        }
+//        stopFindingAds();
+        info("Main Scenario finished");
+        info("Number attempt " + numberAttempt);
+        info("Number failed acc " + failedAccount);
+    }
+
     public static void main(String[] args) {
         LogUtil.init();
 
-        WebDriver driver = DriverUtil.getInstance();
-        GoogleScenario googleScenario = new GoogleScenario(driver);
-        YouTubeScenario youtubeScenario = new YouTubeScenario(driver);
+//        WebDriver driver = DriverUtil.initChrome();
+//        GoogleScenario googleScenario = new GoogleScenario(driver);
+//        YouTubeScenario youtubeScenario = new YouTubeScenario(driver);
+//        YoutubeDatabases youtubeDatabases = StorageUtil.getAccDatabase();
 
-        YoutubeDatabases youtubeDatabases = getAccDatabase();
+        MainScript mainScript = new MainScript(StorageUtil.getAccDatabase());
+        mainScript.playMainScenario();
 
-        MainScript mainScript = new MainScript(googleScenario, youtubeScenario, youtubeDatabases);
-
-        try {
-            mainScript.playScenario4();
-        } catch (Exception e) {
-            e.printStackTrace();
-            severe("Scenario suspend unexpectedly");
-            severe("Number attempt" + mainScript.numberAttempt);
-            severe("Failed account " + mainScript.failedAccount);
-        } finally {
-            DriverUtil.close();
-        }
+//        try {
+//            mainScript.playScenario4();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        } finally {
+//            DriverUtil.close();
+//        }
     }
 }

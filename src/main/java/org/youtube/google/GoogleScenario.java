@@ -144,19 +144,19 @@ public class GoogleScenario {
         // Tìm input, nếu vẫn k có thì 90% tài khoản này xác nhận email back up r, thông báo đăng nhập thành công
         WebElement eBackupInput = CommonUtil.waitElement(driver, By.id("knowledge-preregistered-email-response"), null);
         if (eBackupInput != null) {
-            info("eBackupInput is : " + eBackupInput.getText());
             CommonUtil.enterKeys(eBackupInput, account.getBackupEmail());
 
             WebElement eNextStep = CommonUtil.waitElement(driver, By.className("VfPpkd-RLmnJb"), null);
             if (eNextStep != null) {
                 eNextStep.click();
 
-                CommonUtil.pause(5);
+                CommonUtil.pause(3);
                 WebElement eSkipButton = CommonUtil.waitElement(driver, By.className("snByac"), null);
                 if (eSkipButton != null) {
                     eSkipButton.click();
                 } else {
-                    throw new GoogleException("Entered backup email, skip button not found");
+                    // Nếu login 3rg party có TH nhập backup email vào là xong, k cần skip, nên k throw lỗi để tiếp tục đến nick khác
+//                  throw new GoogleException("Entered backup email, skip button not found");
                 }
             } else {
                 // Nếu không có thì có khả năng đăng nhập qua 3rd party, nó k hỏi mà tự nhảy về trang chủ 3rd pary luôn
