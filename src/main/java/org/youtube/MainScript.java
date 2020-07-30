@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 import static org.youtube.util.LogUtil.*;
 
@@ -245,14 +246,83 @@ public class MainScript {
 //        findingAds();
         List<YoutubeAccount> youtubeAccounts = youtubeDatabases.getAllAccounts();
         info("Total number accounts is " + youtubeAccounts.size());
+        CountDownLatch countDownLatch = new CountDownLatch(youtubeAccounts.size());
         for (int i = 0; i < youtubeAccounts.size(); i++) {
-            info("Start run account number " + i);
-            YoutubeAccount youtubeAccount = youtubeAccounts.get(i);
+            new Thread(new MainRunnable(countDownLatch, youtubeAccounts.get(i))).start();
+//            info("Start run account number " + i);
+//            YoutubeAccount youtubeAccount = youtubeAccounts.get(i);
+//
+//            WebDriver driver = DriverUtil.initChrome();
+//            GoogleScenario googleScenario = new GoogleScenario(driver);
+//            YouTubeScenario youtubeScenario = new YouTubeScenario(driver);
+//
+//            try {
+//                googleScenario.goGoogleSignInPageThrough3rdParty();
+//                googleScenario.attemptToLogin(youtubeAccount);
 
-            WebDriver driver = DriverUtil.initChrome();
-            GoogleScenario googleScenario = new GoogleScenario(driver);
-            YouTubeScenario youtubeScenario = new YouTubeScenario(driver);
+//                List<YoutubeChannel> channels = youtubeDatabases.getAllChannels();
+//                for (YoutubeChannel channel : channels) {
+//                    List<ChannelVideo> videos = youtubeDatabases.getAllChannelVideos(channel);
+//                    videos.forEach(video -> {
+//                        try {
+//                            youtubeScenario.openLink(video);
+//                        } catch (YouTubeException.YouTubeFailedToPlayException e) {
+//                            warning(e.getMessage());
+//                        }
+//                    });
+//                }
 
+//                googleScenario.attemptSignOut();
+
+//            } catch (Exception e) {
+//                if (e instanceof WebDriverException) {
+//                    severe("Browser suspend unexpectedly, " + e.getMessage());
+//                    break;
+//                } else {
+//                    severe(e.getMessage());
+//                    warning("Skip account " + youtubeAccount.getEmail() + " number " + i);
+//                    failedAccount++;
+//                }
+//            } finally {
+//                numberAttempt++;
+//                info("==================End of acc flow=================");
+//                CommonUtil.pause(2);
+//                driver.quit();
+//            }
+        }
+//        stopFindingAds();
+
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            info("Main Scenario finished");
+            info("Number attempt " + numberAttempt);
+            info("Number failed acc " + failedAccount);
+        }
+    }
+
+    public class MainRunnable implements Runnable {
+
+        private final WebDriver driver;
+        private final GoogleScenario googleScenario;
+        private final YouTubeScenario youTubeScenario;
+
+        private final YoutubeAccount youtubeAccount;
+
+        private final CountDownLatch countDownLatch;
+
+        public MainRunnable(CountDownLatch countDownLatch, YoutubeAccount youtubeAccount) {
+            this.youtubeAccount = youtubeAccount;
+            this.driver = DriverUtil.initChrome();
+            this.googleScenario = new GoogleScenario(driver);
+            this.youTubeScenario = new YouTubeScenario(driver);
+            this.countDownLatch = countDownLatch;
+        }
+
+        @Override
+        public void run() {
             try {
                 googleScenario.goGoogleSignInPageThrough3rdParty();
                 googleScenario.attemptToLogin(youtubeAccount);
@@ -274,23 +344,20 @@ public class MainScript {
             } catch (Exception e) {
                 if (e instanceof WebDriverException) {
                     severe("Browser suspend unexpectedly, " + e.getMessage());
-                    break;
                 } else {
                     severe(e.getMessage());
-                    warning("Skip account " + youtubeAccount.getEmail() + " number " + i);
+                    warning("Skip account " + youtubeAccount.getEmail());
                     failedAccount++;
                 }
             } finally {
                 numberAttempt++;
                 info("==================End of acc flow=================");
+                countDownLatch.countDown();
+                ;
                 CommonUtil.pause(2);
                 driver.quit();
             }
         }
-//        stopFindingAds();
-        info("Main Scenario finished");
-        info("Number attempt " + numberAttempt);
-        info("Number failed acc " + failedAccount);
     }
 
     public static void main(String[] args) {

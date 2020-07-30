@@ -26,14 +26,14 @@ public class LogUtil {
     }
 
     public static void info(String message) {
-        logger.info(message);
+        logger.info(Thread.currentThread() + message);
     }
 
     public static void severe(String message) {
-        logger.severe(message);
+        logger.severe(Thread.currentThread() + message);
     }
 
     public static void warning(String message) {
-        logger.warning(message);
+        logger.warning(Thread.currentThread() + message);
     }
 }
