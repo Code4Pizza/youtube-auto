@@ -2,6 +2,7 @@ package org.youtube;
 
 import org.jdbi.v3.core.Jdbi;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.youtube.configuration.CircuitBreakerConfiguration;
@@ -169,7 +170,6 @@ public class MainScript {
 
             adThread = new Thread(this);
             adThread.start();
-
         }
     };
 
@@ -197,10 +197,12 @@ public class MainScript {
         numberAttempt = 0;
         failedAccount = 0;
         List<YoutubeAccount> youtubeAccounts = youtubeDatabases.getAllAccounts();
-        for (YoutubeAccount youtubeAccount : youtubeAccounts) {
+        for (int i = 0 ; i < youtubeAccounts.size(); i++) {
+            info("Start run account number " + i);
+            YoutubeAccount youtubeAccount = youtubeAccounts.get(i);
             try {
-                googleScenario.goGoogleSignInPage();
-//                googleScenario.goGoogleSignInPageThrough3rdParty();
+//                googleScenario.goGoogleSignInPage();
+                googleScenario.goGoogleSignInPageThrough3rdParty();
                 googleScenario.attemptToLogin(youtubeAccount);
 
                 if (adThread != null) {
@@ -214,7 +216,7 @@ public class MainScript {
                     List<ChannelVideo> videos = youtubeDatabases.getAllChannelVideos(channel);
                     videos.forEach(video -> {
                         try {
-                            youtubeScenario.openLink(video.getVideoUrl());
+                            youtubeScenario.openLink(video);
                         } catch (YouTubeException.YouTubeFailedToPlayException e) {
                             warning(e.getMessage());
                         }
@@ -222,17 +224,27 @@ public class MainScript {
                 }
 
                 googleScenario.attemptSignOut();
+//                googleScenario.attemptToSignOutYouTube();
             } catch (Exception e) {
-                severe(e.getMessage());
-                severe("Skip account " + youtubeAccount.getEmail());
-                failedAccount++;
+                if (e instanceof WebDriverException) {
+                    severe("Browser suspend unexpectedly, " + e.getMessage());
+                    break;
+                } else {
+                    severe(e.getMessage());
+                    severe("Skip account " + youtubeAccount.getEmail() + " number " + i);
+                    failedAccount++;
+                }
             }
             info("==================End of acc flow=================");
             numberAttempt++;
-//            CommonUtil.pause(20);
+            CommonUtil.pause(2);
         }
         info("Scenario 4 finished");
+        info("Number attempt " + numberAttempt);
         info("Number failed acc " + failedAccount);
+        if (adThread != null) {
+            adThread.interrupt();
+        }
     }
 
     public static void main(String[] args) {
@@ -253,8 +265,8 @@ public class MainScript {
             severe("Scenario suspend unexpectedly");
             severe("Number attempt" + mainScript.numberAttempt);
             severe("Failed account " + mainScript.failedAccount);
+        } finally {
+            DriverUtil.close();
         }
-
-
     }
 }

@@ -13,6 +13,7 @@ public class VideoRowMapper implements RowMapper<ChannelVideo> {
   public ChannelVideo map(ResultSet resultSet, StatementContext ctx) throws SQLException {
     return new ChannelVideo(resultSet.getInt("id"),
             resultSet.getInt("channel_id"),
-            resultSet.getString("video_url"));
+            resultSet.getString("video_url"),
+            resultSet.getInt("duration"));
   }
 }

@@ -57,7 +57,7 @@ public class CommonUtil {
 
     public static WebElement waitElement(WebDriver driver, By by, Map<String, String> mapAttrs) {
         try {
-            WebDriverWait wait = new WebDriverWait(driver, 10);
+            WebDriverWait wait = new WebDriverWait(driver, 8);
             wait.until(ExpectedConditions.elementToBeClickable(by));
             return findByClassAndAttrs(driver, by, mapAttrs);
         } catch (RuntimeException e) {
@@ -67,7 +67,7 @@ public class CommonUtil {
 
 	public static WebElement waitElement(WebDriver driver, String className, Map<String, String> mapAttrs) {
 		try {
-			WebDriverWait wait = new WebDriverWait(driver, 10);
+			WebDriverWait wait = new WebDriverWait(driver, 8);
 			wait.until(ExpectedConditions.elementToBeClickable(By.className(className)));
 			return findByClassAndAttrs(driver, getBy(driver, className), mapAttrs);
 		} catch (RuntimeException e) {

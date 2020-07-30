@@ -1,10 +1,14 @@
 package org.youtube.util;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.remote.DesiredCapabilities;
 
 import java.io.File;
 import java.util.Collections;
@@ -33,6 +37,8 @@ public class DriverUtil {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--disable-blink-features");
         options.addArguments("--disable-blink-features=AutomationControlled");
+//        options.addArguments("chrome.switches", "--disable-extensions");
+//        options.addArguments("user-data-dir=" + "/Users/theanh/Library/Application Support/Google/Chrome");
 
 //		ChromeOptions options = new ChromeOptions();
         options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
@@ -43,10 +49,10 @@ public class DriverUtil {
         Optional<String> first = mapUA.keySet().stream().findFirst();
         if (first.isPresent()) {
             String browser = first.get();
-            userAgent = new ImmutablePair<>(browser, mapUA.get(browser));
+            userAgent = new ImmutablePair<>(browser, "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/534.18 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/534.18");
         }
 
-//		options.addArguments(String.format("--user-agent=%s", USER_AGENT));
+//		options.addArguments(String.format("--user-agent=%s", userAgent));
 //		options.addArguments("--start-maximized");
 
 //		Proxy proxy = new org.openqa.selenium.Proxy();
@@ -59,8 +65,9 @@ public class DriverUtil {
 //		desiredCapabilities.setCapability(ChromeOptions.CAPABILITY, options);
 
 //		ChromeDriver driver = new ChromeDriver(desiredCapabilities);
-        options.addExtensions(new File(path + "/src/main/resources/proxy.zip"));
+//        options.addExtensions(new File(path + "/src/main/resources/proxy.zip"));
         ChromeDriver driver = new ChromeDriver(options);
+        driver.manage().window().maximize();
 //		CookiesUtil.readCookies(driver);
         return driver;
     }
@@ -75,7 +82,7 @@ public class DriverUtil {
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
-
+            e.printStackTrace();
         }
         if (driver != null) {
             driver.close();

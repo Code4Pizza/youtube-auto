@@ -8,6 +8,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.youtube.entities.ChannelVideo;
 import org.youtube.util.CommonUtil;
 
 import java.util.List;
@@ -20,19 +21,22 @@ public class YouTubeScenario {
 
     public static final long DEFAULT_DELAY = 600000;
 
-    private WebDriver driver;
+    private final WebDriver driver;
 
     public YouTubeScenario(WebDriver driver) {
         this.driver = driver;
     }
 
-    public void openLink(String url) throws YouTubeException.YouTubeFailedToPlayException {
+    public void go(String url) {
+        driver.get(url);
+    }
 
+    public void openLink(ChannelVideo video) throws YouTubeException.YouTubeFailedToPlayException {
+        String url = video.getVideoUrl();
         logger.info("Open url " + url);
         long duration = DEFAULT_DELAY;
         long timeToTakeActions = 0;
         driver.get(url);
-//		attempToPlay();
         duration = getVideoDuration();
 
         long startAction = System.currentTimeMillis();
@@ -43,8 +47,8 @@ public class YouTubeScenario {
         logger.info("Duration is : " + duration);
         try {
 
-            Thread.sleep(Math.min(DEFAULT_DELAY, (duration - timeToTakeActions)));
-
+//            Thread.sleep(Math.min(DEFAULT_DELAY, (duration - timeToTakeActions)));
+            Thread.sleep(video.getDuration() * 900);
             // Fix thời gian video lại cho xem khoảng 5 phút thì switch acc
 //			Thread.sleep(200000);
         } catch (InterruptedException e) {
@@ -64,13 +68,15 @@ public class YouTubeScenario {
             WebElement playElement = driver.findElement(By.className("ytp-play-button"));
             if (playElement != null) {
                 logger.info("Found play element, now need to find play button");
-            }
-            String titleButtonPlay = playElement.getAttribute("title");
-            if (titleButtonPlay.contains("Phát") || titleButtonPlay.contains("Play")) {
-                logger.info("Click play video");
-                playElement.click();
+                String titleButtonPlay = playElement.getAttribute("title");
+                if (titleButtonPlay.contains("Phát") || titleButtonPlay.contains("Play")) {
+                    logger.info("Click play video");
+                    playElement.click();
+                } else {
+                    logger.info("Cant find play buton");
+                }
             } else {
-                logger.info("Cant find play buton");
+                logger.info("Can not find play button");
             }
         } catch (RuntimeException e) {
             e.printStackTrace();
