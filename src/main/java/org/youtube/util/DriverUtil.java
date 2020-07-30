@@ -65,7 +65,7 @@ public class DriverUtil {
 //		desiredCapabilities.setCapability(ChromeOptions.CAPABILITY, options);
 
 //		ChromeDriver driver = new ChromeDriver(desiredCapabilities);
-//        options.addExtensions(new File(path + "/src/main/resources/proxy.zip"));
+        options.addExtensions(new File(path + "/src/main/resources/proxy.zip"));
         ChromeDriver driver = new ChromeDriver(options);
         driver.manage().window().maximize();
 //		CookiesUtil.readCookies(driver);

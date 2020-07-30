@@ -31,7 +31,7 @@ public class YouTubeScenario {
         driver.get(url);
     }
 
-    public void openLink(ChannelVideo video) throws YouTubeException.YouTubeFailedToPlayException {
+    public void openLink(ChannelVideo video) {
         String url = video.getVideoUrl();
         logger.info("Open url " + url);
         long duration = DEFAULT_DELAY;
