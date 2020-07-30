@@ -106,8 +106,8 @@ public class MainScript {
             // tim kiem thu may the quang cao nho thoi
             WebElement smallAds = CommonUtil.waitElement(driver, "ytp-ad-overlay-image", null);
             if (smallAds != null) {
-                info("Found a small button");
-                if (canClick(++totalAds, clickedAds)) {
+                info(String.format("Found a small button, now found %d ads, clicked %d ads", ++totalAds, clickedAds));
+                if (canClick(totalAds, clickedAds)) {
                     new Actions(driver).moveToElement(smallAds).click().perform();
                     Set<String> sets = driver.getWindowHandles();
                     List<String> lists = new ArrayList<>(sets);
@@ -129,6 +129,42 @@ public class MainScript {
             } else {
                 info("Now can not find any small ads");
             }
+
+
+            // tim kiem thu may the quang cao sieu nho thoi
+            WebElement tiniAds = CommonUtil.waitElement(driver, "ytp-ad-overlay-link", null);
+            if (tiniAds != null) {
+                info(String.format("Found a tini button, now found %d ads, clicked %d ads", ++totalAds, clickedAds));
+                if (canClick(totalAds, clickedAds)) {
+                    new Actions(driver).moveToElement(tiniAds).click().perform();
+                    Set<String> sets = driver.getWindowHandles();
+                    List<String> lists = new ArrayList<>(sets);
+
+                    if (lists.size() > clickedAds + 1) {
+                        info(String.format("Clicked %d of %d display ads", ++clickedAds, totalAds));
+                        driver.switchTo().window(lists.get(0));
+                        CommonUtil.pause(1);
+                        try {
+                            youtubeScenario.attempToPlay();
+                           // dong quang cao nay lai
+                            WebElement skipButton = CommonUtil.waitElement(driver, "ytp-ad-overlay-close-button", null);
+                            if (skipButton != null) {
+                                Actions actions = new Actions(driver);
+                                actions.moveToElement(skipButton).click().perform();
+                            } else {
+                                info("Can not find close button");
+                            }
+                        } catch (Exception e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                    }
+                } else {
+                    info("Now can not click this tini ads, wait for next time");
+                }
+            } else {
+                info("Now can not find any tini ads");
+            }
             CommonUtil.pause(30);
 
             adThread = new Thread(this);
@@ -138,9 +174,13 @@ public class MainScript {
     };
 
     private boolean canClick(Integer totalAds, Integer clickedAds) {
+        info(String.format("Start check can click ads with total %d, clicked %d", totalAds, clickedAds));
         if (clickedAds == 0 || totalAds == 0)
             return true;
-        else return (float) clickedAds / totalAds < 0.1;
+        else {
+            int percent = clickedAds * 100 / totalAds;
+            return percent < 30;
+        }
     }
 
     public static YoutubeDatabases getAccDatabase() {
