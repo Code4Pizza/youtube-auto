@@ -2,6 +2,7 @@ package org.youtube;
 
 import org.jdbi.v3.core.Jdbi;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.youtube.configuration.CircuitBreakerConfiguration;
@@ -153,45 +154,52 @@ public class MainScript {
     public int failedAccount = 0;
 
     public void playScenario4() {
-        findingAds();
+//        findingAds();
         numberAttempt = 0;
         failedAccount = 0;
         List<YoutubeAccount> youtubeAccounts = youtubeDatabases.getAllAccounts();
-        for (YoutubeAccount youtubeAccount : youtubeAccounts) {
+        for (int i = 0 ; i < youtubeAccounts.size(); i++) {
+            info("Start run account number " + i);
+            YoutubeAccount youtubeAccount = youtubeAccounts.get(i);
             try {
                 googleScenario.goGoogleSignInPage();
-//                googleScenario.goGoogleSignInPageThrough3rdParty();
                 googleScenario.attemptToLogin(youtubeAccount);
 
-                if (adThread != null) {
-                    System.out.println("Interupt Ads");
-                    adThread.interrupt();
-                }
+//                if (adThread != null) {
+//                    System.out.println("Interupt Ads");
+//                    adThread.interrupt();
+//                }
 
 
-                List<YoutubeChannel> channels = youtubeDatabases.getAllChannels();
-                for (YoutubeChannel channel : channels) {
-                    List<ChannelVideo> videos = youtubeDatabases.getAllChannelVideos(channel);
-                    videos.forEach(video -> {
-                        try {
-                            youtubeScenario.openLink(video.getVideoUrl());
-                        } catch (YouTubeException.YouTubeFailedToPlayException e) {
-                            warning(e.getMessage());
-                        }
-                    });
-                }
+//                List<YoutubeChannel> channels = youtubeDatabases.getAllChannels();
+//                for (YoutubeChannel channel : channels) {
+//                    List<ChannelVideo> videos = youtubeDatabases.getAllChannelVideos(channel);
+//                    videos.forEach(video -> {
+//                        try {
+//                            youtubeScenario.openLink(video.getVideoUrl());
+//                        } catch (YouTubeException.YouTubeFailedToPlayException e) {
+//                            warning(e.getMessage());
+//                        }
+//                    });
+//                }
 
-                googleScenario.attemptSignOut();
+//                googleScenario.attemptSignOut();
             } catch (Exception e) {
-                severe(e.getMessage());
-                severe("Skip account " + youtubeAccount.getEmail());
-                failedAccount++;
+                if (e instanceof WebDriverException) {
+                    severe("Browser suspend unexpectedly");
+                    break;
+                } else {
+                    severe(e.getMessage());
+                    severe("Skip account " + youtubeAccount.getEmail() + " number " + i);
+                    failedAccount++;
+                }
             }
             info("==================End of acc flow=================");
             numberAttempt++;
 //            CommonUtil.pause(20);
         }
         info("Scenario 4 finished");
+        info("Number attempt " + numberAttempt);
         info("Number failed acc " + failedAccount);
     }
 
@@ -214,7 +222,5 @@ public class MainScript {
             severe("Number attempt" + mainScript.numberAttempt);
             severe("Failed account " + mainScript.failedAccount);
         }
-
-
     }
 }

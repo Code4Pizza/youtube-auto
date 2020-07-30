@@ -27,15 +27,17 @@ public class GoogleScenario {
         this.driver = driver;
     }
 
-    public void goGoogleSignInPage() throws GoogleException.GoogleSignInNotFoundException {
+    public void goGoogleSignInPage() throws GoogleException {
         info("Go to google page");
         driver.get(GOOGLE_URL);
-        WebElement signInButton = driver.findElement(By.id("gb_70"));
+
+        WebElement signInButton = CommonUtil.waitElement(driver, By.id("gb_70"), null);
         if (signInButton != null) {
             CommonUtil.pause(1);
             signInButton.click();
         } else {
-            throw new GoogleException.GoogleSignInNotFoundException();
+            severe("Button sign in not found, try to sign out");
+            attemptSignOut();
         }
     }
 
@@ -134,28 +136,30 @@ public class GoogleScenario {
         if (eConfirmBackup != null && !eConfirmBackup.getText().isEmpty()) {
             info("Google showing confirm backup email panel");
             eConfirmBackup.click();
+        } else {
+            // Có case đăng nhập qua third party thì k cần p ấn nút confirm, nó tự động nhảy vào input luôn
+        }
 
-            WebElement eBackupInput = CommonUtil.waitElement(driver, By.id("knowledge-preregistered-email-response"), null);
-            if (eBackupInput != null) {
-                CommonUtil.enterKeys(eBackupInput, account.getBackupEmail());
-            } else {
-                throw new GoogleException("Input backup email not found");
-            }
+        // Tìm input, nếu vẫn k có thì 90% tài khoản này xác nhận email back up r, thông báo đăng nhập thành công
+        WebElement eBackupInput = CommonUtil.waitElement(driver, By.id("knowledge-preregistered-email-response"), null);
+        if (eBackupInput != null) {
+            CommonUtil.enterKeys(eBackupInput, account.getBackupEmail());
 
             WebElement eNextStep = CommonUtil.waitElement(driver, By.className("VfPpkd-RLmnJb"), null);
             if (eNextStep != null) {
                 eNextStep.click();
+
+                CommonUtil.pause(1);
+                WebElement eSkipButton = CommonUtil.waitElement(driver, By.className("snByac"), null);
+                if (eSkipButton != null) {
+                    eSkipButton.click();
+                } else {
+                    throw new GoogleException("Entered backup email, skip button not found");
+                }
             } else {
-                throw new GoogleException("Entered backup email, next step button not found");
+                // Nếu không có thì có khả năng đăng nhập qua 3rd party, nó k hỏi mà tự nhảy về trang chủ 3rd pary luôn
             }
 
-            CommonUtil.pause(2);
-            WebElement eSkipButton = CommonUtil.waitElement(driver, By.className("snByac"), null);
-            if (eSkipButton != null) {
-                eSkipButton.click();
-            } else {
-                throw new GoogleException("Entered backup email, skip button not found");
-            }
         }
         info("Account " + account.getEmail() + " successfully signed in");
 
