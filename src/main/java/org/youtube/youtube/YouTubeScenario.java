@@ -19,7 +19,7 @@ public class YouTubeScenario {
     private static final Logger logger = LoggerFactory.getLogger(YouTubeScenario.class);
 
 
-    public static final long DEFAULT_DELAY = 600000;
+    public static final long DEFAULT_DELAY = 10 * 60 * 1000;
 
     private final WebDriver driver;
 
@@ -29,6 +29,11 @@ public class YouTubeScenario {
 
     public void go(String url) {
         driver.get(url);
+    }
+
+    public void goYoutubeAndChangeLanguage() {
+        driver.get("https://youtube.com");
+        //
     }
 
     public void openLink(ChannelVideo video) {
@@ -48,7 +53,7 @@ public class YouTubeScenario {
         try {
 
 //            Thread.sleep(Math.min(DEFAULT_DELAY, (duration - timeToTakeActions)));
-            Thread.sleep(video.getDuration() * 900);
+            Thread.sleep(Math.min(video.getDuration() * 900, DEFAULT_DELAY));
             // Fix thời gian video lại cho xem khoảng 5 phút thì switch acc
 //			Thread.sleep(200000);
         } catch (InterruptedException e) {

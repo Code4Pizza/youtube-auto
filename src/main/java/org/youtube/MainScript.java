@@ -43,11 +43,20 @@ public class MainScript {
 
     private boolean canClick(Integer totalAds, Integer clickedAds) {
         info(String.format("Start check can click ads with total %d, clicked %d", totalAds, clickedAds));
+
+        // cho nay code lai mot chut
+//        int ifClick = clickedAds +1;
+//        if (totalAds == 0)
+//            return false;
+//        else {
+//            int percent = ifClick * 100 / totalAds;
+//            return percent < 20;
+//        }
         if (clickedAds == 0 || totalAds == 0)
             return true;
         else {
             int percent = clickedAds * 100 / totalAds;
-            return percent < 30;
+            return percent < 20;
         }
     }
 
@@ -104,6 +113,8 @@ public class MainScript {
         List<YoutubeChannel> channels = youtubeDatabases.getAllChannels();
         YoutubeChannel channel = channels.get(0);
         List<ChannelVideo> videos = youtubeDatabases.getAllChannelVideos(channel);
+
+        // chia lam 3 account 1 lan chay
         for (int i = 0; i < youtubeAccounts.size(); i++) {
             new Thread(new MainRunnable(countDownLatch, youtubeAccounts.get(i), videos)).start();
         }
@@ -200,6 +211,14 @@ public class MainScript {
                         }
                     } else {
                         info("Now can not click this small ads, wait for next time");
+                        // close it
+                        WebElement skipButton = CommonUtil.waitElement(driver, "ytp-ad-overlay-close-button", null);
+                        if (skipButton != null) {
+                            Actions actions = new Actions(driver);
+                            actions.moveToElement(skipButton).click().perform();
+                        } else {
+                            info("Can not find close button");
+                        }
                     }
                 } else {
                     info("Now can not find any small ads");
@@ -236,12 +255,20 @@ public class MainScript {
                         }
                     } else {
                         info("Now can not click this tini ads, wait for next time");
+                        // close it
+                        String tiniCloseId  = "ytp-ad-overlay-close-button";
+                        WebElement skipButton = CommonUtil.waitElement(driver, tiniCloseId, null);
+                        if (skipButton != null) {
+                            Actions actions = new Actions(driver);
+                            actions.moveToElement(skipButton).click().perform();
+                        } else {
+                            info("Can not find close button");
+                        }
                     }
                 } else {
                     info("Now can not find any tini ads");
                 }
-                CommonUtil.pause(30);
-
+                CommonUtil.pause(25);
                 adThread = new Thread(this);
                 adThread.start();
             }
@@ -279,6 +306,7 @@ public class MainScript {
                 findingAds();
                 googleScenario.goGoogleSignInPageThrough3rdParty();
                 googleScenario.attemptToLogin(youtubeAccount);
+                CommonUtil.pause(10);
                 for (ChannelVideo video : videos) {
                     info("video : " + video.getVideoUrl());
                     youTubeScenario.openLink(video);
