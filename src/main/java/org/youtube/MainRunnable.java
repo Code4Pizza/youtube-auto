@@ -185,12 +185,29 @@ public class MainRunnable implements Runnable {
                         CommonUtil.pause(1);
                         try {
                             youTubeScenario.attemptToPlay();
+
+                            // dong quang cao nay lai
+                            WebElement skipButton = CommonUtil.waitElement(driver, "ytp-ad-overlay-close-button", null);
+                            if (skipButton != null) {
+                                Actions actions = new Actions(driver);
+                                actions.moveToElement(skipButton).click().perform();
+                            } else {
+                                info("Can not find close button");
+                            }
                         } catch (YouTubeException.YouTubeFailedToPlayException e) {
                             e.printStackTrace();
                         }
                     }
                 } else {
                     info("Now can not click this small ads, wait for next time");
+                    // dong quang cao nay lai
+                    WebElement skipButton = CommonUtil.waitElement(driver, "ytp-ad-overlay-close-button", null);
+                    if (skipButton != null) {
+                        Actions actions = new Actions(driver);
+                        actions.moveToElement(skipButton).click().perform();
+                    } else {
+                        info("Can not find close button");
+                    }
                 }
             } else {
                 info("Now can not find any small ads");
@@ -228,6 +245,14 @@ public class MainRunnable implements Runnable {
                     }
                 } else {
                     info("Now can not click this tini ads, wait for next time");
+                    // dong quang cao nay lai
+                    WebElement skipButton = CommonUtil.waitElement(driver, "ytp-ad-overlay-close-button", null);
+                    if (skipButton != null) {
+                        Actions actions = new Actions(driver);
+                        actions.moveToElement(skipButton).click().perform();
+                    } else {
+                        info("Can not find close button");
+                    }
                 }
             } else {
                 info("Now can not find any tini ads");
@@ -242,7 +267,7 @@ public class MainRunnable implements Runnable {
                 return true;
             } else {
                 int percent = clickedAds * 100 / totalAds;
-                return percent < 30;
+                return percent < 50;
             }
         }
     }
