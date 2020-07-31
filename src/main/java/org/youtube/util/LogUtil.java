@@ -13,7 +13,7 @@ public class LogUtil {
         try {
             // This block configure the logger with handler and formatter
             String path = System.getProperty("user.dir");
-            FileHandler fh = new FileHandler(path + "/" + logName + ".txt");
+            FileHandler fh = new FileHandler(path + "/logs/" + logName + ".txt");
             logger.addHandler(fh);
             SimpleFormatter formatter = new SimpleFormatter();
             fh.setFormatter(formatter);

@@ -1,4 +1,5 @@
 log.txt
+logs/*
 target/*
 .idea/*
 youtube-auto.iml

@@ -8,6 +8,7 @@ import org.youtube.storage.YoutubeDatabases;
 import org.youtube.util.LogUtil;
 import org.youtube.util.StorageUtil;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -17,9 +18,8 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import static org.youtube.util.LogUtil.info;
-import static org.youtube.util.LogUtil.warning;
 
-public class MainScript {
+public class SpamViewProc {
 
     ExecutorService executor = Executors.newFixedThreadPool(2);
 
@@ -56,7 +56,10 @@ public class MainScript {
         CountDownLatch countDownLatch = new CountDownLatch(youtubeAccounts.size());
 
         for (YoutubeAccount youtubeAccount : youtubeAccounts) {
-            executor.execute(new MainRunnable(countDownLatch, youtubeAccount, prepareVideos(), isSpamView));
+            // moi account se chay mot thread
+                executor.execute(new MainRunnable(countDownLatch, youtubeAccount, youtubeDatabases,
+                        prepareVideos(),
+                        isSpamView, !youtubeAccount.isFake()));
         }
 
         try {
@@ -67,6 +70,14 @@ public class MainScript {
             info("Main Scenario finished");
             info("Total attempt " + numberAttempt);
             info("Number failed acc " + failedAccount);
+            // tim xem con thang nao dang chay khong thi kill di nhe
+            Process process;
+            try {
+                process = Runtime. getRuntime().exec("kill -9 $(pgrep -f chromedriver)");
+                process.destroy();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -86,7 +97,7 @@ public class MainScript {
 
     public static void main(String[] args) {
         LogUtil.init("main_log");
-        MainScript mainScript = new MainScript();
+        SpamViewProc mainScript = new SpamViewProc();
         mainScript.playMainScenario(true);
     }
 }

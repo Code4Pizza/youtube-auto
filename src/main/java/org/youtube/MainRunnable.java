@@ -6,6 +6,7 @@ import org.openqa.selenium.interactions.Actions;
 import org.youtube.entities.ChannelVideo;
 import org.youtube.entities.YoutubeAccount;
 import org.youtube.google.GoogleScenario;
+import org.youtube.storage.YoutubeDatabases;
 import org.youtube.util.CommonUtil;
 import org.youtube.util.DriverUtil;
 import org.youtube.youtube.YouTubeException;
@@ -30,22 +31,29 @@ public class MainRunnable implements Runnable {
 
     private WebDriver driver;
     private GoogleScenario googleScenario;
+    private YoutubeDatabases databases;
     private YouTubeScenario youTubeScenario;
     private final boolean isSpamView;
+    private final boolean needEthernet;
 
     private Thread adThread;
     private boolean runningAd;
 
-    public MainRunnable(CountDownLatch countDownLatch, YoutubeAccount account, List<ChannelVideo> videos, boolean isSpamView) {
+    public MainRunnable(CountDownLatch countDownLatch, YoutubeAccount account,
+                        YoutubeDatabases databases,
+                        List<ChannelVideo> videos, boolean isSpamView, boolean needEthernet) {
         this.countDownLatch = countDownLatch;
         this.account = account;
         this.videos = videos;
         this.isSpamView = isSpamView;
+        this.needEthernet = needEthernet;
+        this.databases = databases;
     }
 
     @Override
     public void run() {
-        driver = DriverUtil.initChrome();
+        String proxyName = findProxyForAccount();
+        driver = DriverUtil.initChrome(proxyName);
         googleScenario = new GoogleScenario(driver);
         youTubeScenario = new YouTubeScenario(driver);
 
@@ -56,7 +64,7 @@ public class MainRunnable implements Runnable {
                 googleScenario.attemptToLogin(account);
             }
             findingAds();
-            for (ChannelVideo video : videos.subList(0, 1)) {
+            for (ChannelVideo video : videos.subList(0, 5)) {
                 info("video : " + video.getVideoUrl());
                 youTubeScenario.openLink(video);
             }
@@ -64,10 +72,10 @@ public class MainRunnable implements Runnable {
             e.printStackTrace();
             warning(e.getMessage());
             warning("Skip account " + account.getEmail());
-            MainScript.increaseFailedAccount();
+            SpamViewProc.increaseFailedAccount();
         } finally {
             info("==================End of acc " + account.getEmail() + "==================");
-            MainScript.increaseNumberAttempt();
+            SpamViewProc.increaseNumberAttempt();
             stopFindingAds();
             countDownLatch.countDown();
             CommonUtil.pause(1);
@@ -75,19 +83,17 @@ public class MainRunnable implements Runnable {
         }
     }
 
+    private String findProxyForAccount() {
+        return "proxy_0";
+    }
+
     private void findingAds() {
-        if (isSpamView) {
-            return;
-        }
         runningAd = true;
-        adThread = new Thread(new AdRunnable(), AD_THREAD);
+        adThread = new Thread(new AdRunnable(isSpamView), AD_THREAD);
         adThread.start();
     }
 
     private void stopFindingAds() {
-        if (isSpamView) {
-            return;
-        }
         runningAd = false;
         if (adThread != null && adThread.isAlive()) {
             adThread.interrupt();
@@ -95,6 +101,12 @@ public class MainRunnable implements Runnable {
     }
 
     public class AdRunnable implements Runnable {
+
+        private final boolean byPassClick;
+
+        public AdRunnable(boolean byPassClick) {
+            this.byPassClick = byPassClick;
+        }
 
         private int clickedAds, totalAds;
 
@@ -223,6 +235,8 @@ public class MainRunnable implements Runnable {
         }
 
         private boolean canClick(int totalAds, int clickedAds) {
+            if (byPassClick)
+                return false;
             info(String.format("Start check can click ads with total %d, clicked %d", totalAds, clickedAds));
             if (clickedAds == 0 || totalAds == 0) {
                 return true;

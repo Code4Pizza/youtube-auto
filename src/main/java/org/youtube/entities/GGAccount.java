@@ -1,4 +1,4 @@
-package org.youtube;
+package org.youtube.entities;
 
 public class GGAccount {
 	private String email;

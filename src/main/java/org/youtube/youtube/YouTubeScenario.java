@@ -47,10 +47,7 @@ public class YouTubeScenario {
         logger.info("Duration is : " + duration * 1000);
         try {
 
-//            Thread.sleep(Math.min(DEFAULT_DELAY, (duration - timeToTakeActions)));
             Thread.sleep(video.getDuration() * 900);
-            // Fix thời gian video lại cho xem khoảng 5 phút thì switch acc
-//			Thread.sleep(200000);
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -81,7 +78,7 @@ public class YouTubeScenario {
     }
 
     private void attempToLike() {
-        CommonUtil.pause(5);
+        CommonUtil.pause(15);
         List<WebElement> elements = driver.findElements(By.xpath("//*[@id=\"button\"]"));
         for (WebElement e : elements) {
             String ariaLabel = e.getAttribute("aria-label");

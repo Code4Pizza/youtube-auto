@@ -6,7 +6,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.jdbi.v3.core.Jdbi;
-import org.youtube.GGAccount;
+import org.youtube.entities.GGAccount;
 import org.youtube.configuration.CircuitBreakerConfiguration;
 import org.youtube.entities.YoutubeAccount;
 import org.youtube.storage.YoutubeDatabases;
