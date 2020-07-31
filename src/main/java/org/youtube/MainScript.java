@@ -21,7 +21,7 @@ import static org.youtube.util.LogUtil.warning;
 
 public class MainScript {
 
-    ExecutorService executor = Executors.newFixedThreadPool(1);
+    ExecutorService executor = Executors.newFixedThreadPool(2);
 
     protected final YoutubeDatabases youtubeDatabases = StorageUtil.getAccDatabase();
 
@@ -48,7 +48,7 @@ public class MainScript {
         info("Total number accounts is " + youtubeAccounts.size());
 
         if (isSpamView) {
-            List<YoutubeAccount> fakeAccounts = createFakeAccount();
+            List<YoutubeAccount> fakeAccounts = createFakeAccount(youtubeAccounts.size() * 10);
             youtubeAccounts = Stream.concat(youtubeAccounts, fakeAccounts).collect(Collectors.toList());
             Collections.shuffle(youtubeAccounts);
         }
@@ -76,9 +76,9 @@ public class MainScript {
         return youtubeDatabases.getAllChannelVideos(channel);
     }
 
-    public List<YoutubeAccount> createFakeAccount() {
+    public List<YoutubeAccount> createFakeAccount(int counter) {
         List<YoutubeAccount> fakeAccounts = new ArrayList<>();
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < counter; i++) {
             fakeAccounts.add(YoutubeAccount.createFakeAccount());
         }
         return fakeAccounts;

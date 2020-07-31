@@ -13,6 +13,6 @@ public class Constants {
     public static final String PASSWORD = "Aic@2020";
     public static final String DB_NAME = "accounts_database";
 
-    public static final int DEFAULT_DELAY_SECOND = 5;
+    public static final int DEFAULT_DELAY_SECOND = 15;
     public static final int DEFAULT_DELAY_MILLIS = 5000;
 }

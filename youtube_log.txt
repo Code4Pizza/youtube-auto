@@ -1,11 +1,3 @@
-Jul 31, 2020 8:33:13 AM org.youtube.util.LogUtil info
-INFO: Thread[main,5,main]Init log message
-Jul 31, 2020 8:33:15 AM org.youtube.util.LogUtil info
-INFO: Thread[main,5,main]Total number accounts is 10
-Jul 31, 2020 8:33:16 AM org.youtube.util.LogUtil warning
-WARNING: Thread[pool-1-thread-1,5,main]Full path proxy/home/datvt/IdeaProjects/youtube-bot/youtube-auto/src/main/resources/proxy_1.zip
-Jul 31, 2020 8:33:17 AM org.openqa.selenium.remote.ProtocolHandshake createSession
-INFO: Detected dialect: W3C
 Jul 31, 2020 8:33:17 AM org.youtube.util.LogUtil info
 INFO: Thread[pool-1-thread-1,5,main]Init log message
 Jul 31, 2020 8:33:17 AM org.youtube.util.LogUtil info

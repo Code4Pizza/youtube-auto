@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.youtube.entities.ChannelVideo;
 import org.youtube.util.CommonUtil;
+import org.youtube.util.Constants;
+import org.youtube.util.LogUtil;
 
 import java.util.List;
 import java.util.Random;
@@ -23,23 +25,26 @@ public class YouTubeScenario {
     private final WebDriver driver;
 
     public YouTubeScenario(WebDriver driver) {
+        LogUtil.init("youtube_log");
         this.driver = driver;
     }
 
-    public void openLink(ChannelVideo video) {
+    public void openLink(ChannelVideo video) throws YouTubeException.YouTubeFailedToPlayException {
         String url = video.getVideoUrl();
         logger.info("Open url " + url);
         long duration = DEFAULT_DELAY;
         long timeToTakeActions = 0;
         driver.get(url);
-        duration = getVideoDuration();
+        duration = video.getDuration();
 
         long startAction = System.currentTimeMillis();
+        attemptToPlay();
+
         attempToLike();
         attempToSubscribe();
         timeToTakeActions = System.currentTimeMillis() - startAction;
         logger.info("Time to attemp like and sub " + timeToTakeActions);
-        logger.info("Duration is : " + duration);
+        logger.info("Duration is : " + duration * 1000);
         try {
 
 //            Thread.sleep(Math.min(DEFAULT_DELAY, (duration - timeToTakeActions)));
@@ -54,7 +59,7 @@ public class YouTubeScenario {
 
     public void attemptToPlay() throws YouTubeException.YouTubeFailedToPlayException {
         try {
-            WebDriverWait wait = new WebDriverWait(driver, 5);
+            WebDriverWait wait = new WebDriverWait(driver, Constants.DEFAULT_DELAY_SECOND);
             wait.until(ExpectedConditions.elementToBeClickable(By.className("ytp-play-button")));
             WebElement playElement = driver.findElement(By.className("ytp-play-button"));
             if (playElement != null) {
@@ -62,7 +67,7 @@ public class YouTubeScenario {
                 String titleButtonPlay = playElement.getAttribute("title");
                 if (titleButtonPlay.contains("Phát") || titleButtonPlay.contains("Play")) {
                     logger.info("Click play video");
-                    playElement.click();
+                    CommonUtil.click(playElement);
                 } else {
                     logger.info("Cant find play buton");
                 }
