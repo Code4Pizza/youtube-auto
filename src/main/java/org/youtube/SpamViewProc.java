@@ -21,7 +21,7 @@ import static org.youtube.util.LogUtil.info;
 
 public class SpamViewProc {
 
-    ExecutorService executor = Executors.newFixedThreadPool(2);
+    ExecutorService executor = Executors.newFixedThreadPool(4);
 
     protected final YoutubeDatabases youtubeDatabases = StorageUtil.getAccDatabase();
 
@@ -48,7 +48,7 @@ public class SpamViewProc {
         info("Total number accounts is " + youtubeAccounts.size());
 
         if (isSpamView) {
-            List<YoutubeAccount> fakeAccounts = createFakeAccount(youtubeAccounts.size() * 10);
+            List<YoutubeAccount> fakeAccounts = createFakeAccount(youtubeAccounts.size() * 3);
             youtubeAccounts = Stream.concat(youtubeAccounts, fakeAccounts).collect(Collectors.toList());
             Collections.shuffle(youtubeAccounts);
         }

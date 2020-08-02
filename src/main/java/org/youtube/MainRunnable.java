@@ -12,10 +12,7 @@ import org.youtube.util.DriverUtil;
 import org.youtube.youtube.YouTubeException;
 import org.youtube.youtube.YouTubeScenario;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
 import static org.youtube.util.LogUtil.info;
@@ -64,7 +61,8 @@ public class MainRunnable implements Runnable {
                 googleScenario.attemptToLogin(account);
             }
             findingAds();
-            for (ChannelVideo video : videos.subList(0, 5)) {
+            Collections.shuffle(videos);
+            for (ChannelVideo video : videos.subList(0, 8)) {
                 info("video : " + video.getVideoUrl());
                 youTubeScenario.openLink(video);
             }
@@ -84,12 +82,16 @@ public class MainRunnable implements Runnable {
     }
 
     private String findProxyForAccount() {
-        return "proxy_0";
+//        boolean needEthernet =  !account.isFake();
+//        if (needEthernet)
+            return "proxy_full_" + new Random().nextInt(4);
+//        else
+//            return "proxy_" + new Random().nextInt(6);
     }
 
     private void findingAds() {
         runningAd = true;
-        adThread = new Thread(new AdRunnable(isSpamView), AD_THREAD);
+        adThread = new Thread(new AdRunnable(account.isFake()), AD_THREAD);
         adThread.start();
     }
 
@@ -260,14 +262,14 @@ public class MainRunnable implements Runnable {
         }
 
         private boolean canClick(int totalAds, int clickedAds) {
-            if (byPassClick)
-                return false;
+//            if (byPassClick)
+//                return false;
             info(String.format("Start check can click ads with total %d, clicked %d", totalAds, clickedAds));
             if (clickedAds == 0 || totalAds == 0) {
                 return true;
             } else {
                 int percent = clickedAds * 100 / totalAds;
-                return percent < 50;
+                return percent <= 25;
             }
         }
     }

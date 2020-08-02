@@ -32,22 +32,30 @@ public class YouTubeScenario {
     public void openLink(ChannelVideo video) throws YouTubeException.YouTubeFailedToPlayException {
         String url = video.getVideoUrl();
         logger.info("Open url " + url);
-        long duration = DEFAULT_DELAY;
-        long timeToTakeActions = 0;
         driver.get(url);
-        duration = video.getDuration();
 
-        long startAction = System.currentTimeMillis();
         attemptToPlay();
 
-        attempToLike();
-        attempToSubscribe();
-        timeToTakeActions = System.currentTimeMillis() - startAction;
-        logger.info("Time to attemp like and sub " + timeToTakeActions);
-        logger.info("Duration is : " + duration * 1000);
+        // sleep khoang 50% thoi luong clip
         try {
 
-            Thread.sleep(video.getDuration() * 900);
+            Thread.sleep(Math.min(video.getDuration() * 400, DEFAULT_DELAY / 2));
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        attempToLike();
+        try {
+            Thread.sleep(2 * 1000);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        attempToSubscribe();
+        try {
+
+            Thread.sleep(Math.min(video.getDuration() * 400, DEFAULT_DELAY / 2));
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -78,7 +86,7 @@ public class YouTubeScenario {
     }
 
     private void attempToLike() {
-        CommonUtil.pause(15);
+        CommonUtil.pause(5);
         List<WebElement> elements = driver.findElements(By.xpath("//*[@id=\"button\"]"));
         for (WebElement e : elements) {
             String ariaLabel = e.getAttribute("aria-label");
@@ -98,7 +106,8 @@ public class YouTubeScenario {
         CommonUtil.pause(5);
         List<WebElement> subElements = driver.findElements(By.className("ytd-subscribe-button-renderer"));
         for (WebElement e : subElements) {
-            if ("ĐĂNG KÝ".equals(e.getText())) {
+            if ("ĐĂNG KÝ".toLowerCase().equals(e.getText().toLowerCase())
+            || ("Subscribe".toLowerCase().equals(e.getText().toLowerCase()))) {
                 logger.info("Click subscribe");
                 e.click();
                 break;
