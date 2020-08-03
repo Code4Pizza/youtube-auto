@@ -82,11 +82,11 @@ public class MainRunnable implements Runnable {
     }
 
     private String findProxyForAccount() {
-//        boolean needEthernet =  !account.isFake();
-//        if (needEthernet)
-            return "proxy_full_" + new Random().nextInt(4);
-//        else
-//            return "proxy_" + new Random().nextInt(6);
+        boolean needEthernet =  !account.isFake();
+        if (needEthernet)
+            return "proxy_full_" + new Random().nextInt(3);
+        else
+            return "proxy_" + new Random().nextInt(6);
     }
 
     private void findingAds() {
@@ -262,14 +262,14 @@ public class MainRunnable implements Runnable {
         }
 
         private boolean canClick(int totalAds, int clickedAds) {
-//            if (byPassClick)
-//                return false;
+            if (byPassClick)
+                return false;
             info(String.format("Start check can click ads with total %d, clicked %d", totalAds, clickedAds));
             if (clickedAds == 0 || totalAds == 0) {
                 return true;
             } else {
                 int percent = clickedAds * 100 / totalAds;
-                return percent <= 10;
+                return percent <= 15;
             }
         }
     }
