@@ -20,7 +20,7 @@ public class YouTubeScenario {
 
     private static final Logger logger = LoggerFactory.getLogger(YouTubeScenario.class);
 
-    public static final long DEFAULT_DELAY = 600000;
+    public static final long DEFAULT_DELAY = 15 * 60 * 1000;
 
     private final WebDriver driver;
 

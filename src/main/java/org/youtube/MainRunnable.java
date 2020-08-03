@@ -62,7 +62,7 @@ public class MainRunnable implements Runnable {
             }
             findingAds();
             Collections.shuffle(videos);
-            for (ChannelVideo video : videos.subList(0, 8)) {
+            for (ChannelVideo video : videos) {
                 info("video : " + video.getVideoUrl());
                 youTubeScenario.openLink(video);
             }
@@ -269,7 +269,7 @@ public class MainRunnable implements Runnable {
                 return true;
             } else {
                 int percent = clickedAds * 100 / totalAds;
-                return percent <= 25;
+                return percent <= 15;
             }
         }
     }
