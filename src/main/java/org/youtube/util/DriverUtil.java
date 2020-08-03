@@ -9,6 +9,8 @@ import org.youtube.entities.YoutubeAccount;
 import org.youtube.storage.YoutubeDatabases;
 
 import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -23,7 +25,8 @@ public class DriverUtil {
         // Setup path driver
         String path = System.getProperty("user.dir");
         String os = OSUtil.getOSPrefix();
-        System.setProperty("webdriver.chrome.driver", path + "/src/main/resources/chromedriver_" + os);
+        System.setProperty("webdriver.chrome.driver", path + "/home/aichat_aicloud/youtube/youtube-auto/target/classes/chromedriver_" + os);
+//        System.setProperty("webdriver.chrome.driver", "../../../proxies/chromedriver_" + os);
 
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--disable-blink-features");
@@ -42,10 +45,23 @@ public class DriverUtil {
 
         // tu thong tin account, kiem tra xem co the dung duoc proxy nao bay gio
 
-        String relativePath = "/src/main/resources/" + proxyName;
-        String fullPath = path + relativePath + ".zip";
-        LogUtil.warning("Full path proxy" + fullPath);
-        options.addExtensions(new File(fullPath));
+//        String relativePath = "/src/main/resources/" + proxyName;
+//        String fullPath = path + relativePath + ".zip";
+//        LogUtil.warning("Full path proxy" + fullPath);
+
+
+        // doan nay la proxy, nhung ma chay tren server google thi khong can
+//        URL urlProxy = ClassLoader.getSystemResource(proxyName+".zip");
+//        if (urlProxy != null) {
+//            File file = null;
+//            try {
+//                file = new File(urlProxy.toURI());
+//            } catch (URISyntaxException e) {
+//                e.printStackTrace();
+//            }
+//            assert file != null;
+//            options.addExtensions(new File(file.getAbsolutePath()));
+//        } else return null;
         ChromeDriver driver = new ChromeDriver(options);
         driver.manage().window().maximize();
         return driver;

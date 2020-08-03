@@ -12,8 +12,9 @@ public class LogUtil {
     public static void init(String logName) {
         try {
             // This block configure the logger with handler and formatter
-            String path = System.getProperty("user.dir");
-            FileHandler fh = new FileHandler(path + "/logs/" + logName + ".txt");
+//            String path = System.getProperty("user.dir");
+            FileHandler fh = new FileHandler("/home/aichat_aicloud/youtube/youtube-auto/target/classes"
+                    + "/logs/" + logName + ".txt");
             logger.addHandler(fh);
             SimpleFormatter formatter = new SimpleFormatter();
             fh.setFormatter(formatter);
