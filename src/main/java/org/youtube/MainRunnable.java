@@ -269,7 +269,7 @@ public class MainRunnable implements Runnable {
                 return true;
             } else {
                 int percent = clickedAds * 100 / totalAds;
-                return percent <= 15;
+                return percent <= 10;
             }
         }
     }
