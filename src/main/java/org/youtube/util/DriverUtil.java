@@ -25,7 +25,7 @@ public class DriverUtil {
         // Setup path driver
         String path = System.getProperty("user.dir");
         String os = OSUtil.getOSPrefix();
-        System.setProperty("webdriver.chrome.driver", path + "/classes/" + os);
+        System.setProperty("webdriver.chrome.driver", path + "/classes/chromedriver_" + os);
 //        System.setProperty("webdriver.chrome.driver", "../../../proxies/chromedriver_" + os);
 
         ChromeOptions options = new ChromeOptions();
