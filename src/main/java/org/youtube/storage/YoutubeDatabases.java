@@ -64,7 +64,7 @@ public class YoutubeDatabases {
     }
 
     public List<YoutubeAccount> getAllAccounts() {
-        String sql = "SELECT * from yt_bot.youtube_accounts where id > 70 and id <= 100";
+        String sql = "SELECT * from yt_bot.youtube_accounts where id > 50 and id <= 100";
 
         return database.with(jdbi -> jdbi.withHandle(handle -> {
             try (Timer.Context ignored = getAllAccountsTimer.time()) {
