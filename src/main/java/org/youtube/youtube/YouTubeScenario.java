@@ -1,9 +1,7 @@
 package org.youtube.youtube;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
@@ -14,10 +12,13 @@ import org.youtube.util.Constants;
 import org.youtube.util.LogUtil;
 
 import java.util.List;
-import java.util.Random;
+
+import static org.youtube.util.LogUtil.info;
+import static org.youtube.util.LogUtil.warning;
 
 public class YouTubeScenario {
 
+    public static final String YOUTUBE_URL = "https://www.youtube.com/";
     private static final Logger logger = LoggerFactory.getLogger(YouTubeScenario.class);
 
     public static final long DEFAULT_DELAY = 15 * 60 * 1000;
@@ -107,7 +108,7 @@ public class YouTubeScenario {
         List<WebElement> subElements = driver.findElements(By.className("ytd-subscribe-button-renderer"));
         for (WebElement e : subElements) {
             if ("ĐĂNG KÝ".toLowerCase().equals(e.getText().toLowerCase())
-            || ("Subscribe".toLowerCase().equals(e.getText().toLowerCase()))) {
+                    || ("Subscribe".toLowerCase().equals(e.getText().toLowerCase()))) {
                 logger.info("Click subscribe");
                 e.click();
                 break;
@@ -130,12 +131,12 @@ public class YouTubeScenario {
         }
     }
 
-    public void attempToSearch(String key) {
+    public void attemptToSearch(String title, String channelName) {
         try {
-            driver.get("https://www.youtube.com/");
+            driver.get(YOUTUBE_URL);
 
             By search = By.id("search");
-            WebDriverWait wait = new WebDriverWait(driver, 5);
+            WebDriverWait wait = new WebDriverWait(driver, 7);
             wait.until(ExpectedConditions.invisibilityOfElementLocated(search));
 
             List<WebElement> searchInputs = driver.findElements(search);
@@ -152,21 +153,98 @@ public class YouTubeScenario {
                 return;
             }
 
-            String[] words = key.split(" ");
-            for (String word : words) {
-                searchInput.sendKeys(word);
-                searchInput.sendKeys(" ");
-                try {
-                    Thread.sleep((long) ((500 * new Random().nextFloat()) + 500));
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+            CommonUtil.enterKeys(searchInput, title);
+            searchInput.sendKeys(Keys.RETURN);
+            CommonUtil.pause(2);
+
+            List<WebElement> videoTitles = driver.findElements(By.id("video-title"));
+
+            List<WebElement> channels = driver.findElements(By.id("channel-name"));
+
+            WebElement channelElement = null;
+            WebElement titleElement = null;
+            int channelIndex = 0;
+            int titleIndex = 0;
+
+            for (WebElement element : channels) {
+                if (!element.getText().isEmpty()) {
+                    if (element.getText().equals(channelName)) {
+                        warning("Index" + channelIndex + " Channel" + element.getText());
+                        channelElement = element;
+                        break;
+                    }
+                    channelIndex++;
+                }
+            }
+            for (WebElement element : videoTitles) {
+                if (!element.getText().isEmpty()) {
+                    if (channelElement != null && channelIndex == titleIndex) {
+                        titleElement = element;
+                        info("Index" + titleIndex + " Title" + element.getText());
+                        break;
+                    }
+                    titleIndex++;
                 }
             }
 
-            searchInput.sendKeys(Keys.RETURN);
+            CommonUtil.pause(2);
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+
+            if (channelElement != null) {
+                for (int i = 0; i < channelIndex / 8; i++) {
+                    scrollDown(driver);
+                }
+                CommonUtil.pause(1);
+                js.executeScript("arguments[0].scrollIntoView();", channelElement);
+                scrollUp(driver);
+
+                if (titleElement != null) {
+                    info("Click open video");
+                    Actions actions = new Actions(driver);
+                    actions.moveToElement(titleElement).click().perform();
+                }
+            }
 
         } catch (RuntimeException e) {
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * scrollDown() method scrolls down the page.
+     *
+     * @return void
+     */
+    public void scrollDown(WebDriver driver) {
+        try {
+            int i = 0;
+            for (; i <= 30; i++) {
+                ((JavascriptExecutor) driver).executeScript(("window.scrollBy(0," + i + ")"), "");
+            }
+            for (; i > 0; i--) {
+                ((JavascriptExecutor) driver).executeScript(("window.scrollBy(0," + i + ")"), "");
+            }
+        } catch (WebDriverException wde) {
+        } catch (Exception e) {
+        }
+    }
+
+    /**
+     * scrollUp() method scrolls up the page.
+     *
+     * @return void
+     */
+    public void scrollUp(WebDriver driver) {
+        try {
+            int i = 0;
+            for (; i > -20; i--) {
+                ((JavascriptExecutor) driver).executeScript(("window.scrollBy(0," + i + ")"), "");
+            }
+            for (; i < 0; i++) {
+                ((JavascriptExecutor) driver).executeScript(("window.scrollBy(0," + i + ")"), "");
+            }
+        } catch (WebDriverException wde) {
+        } catch (Exception e) {
         }
     }
 

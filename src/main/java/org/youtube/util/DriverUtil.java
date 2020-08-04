@@ -45,11 +45,12 @@ public class DriverUtil {
 
         // tu thong tin account, kiem tra xem co the dung duoc proxy nao bay gio
 
-        String relativePath = "/classes/" + proxyName;
-        String fullPath = path + relativePath + ".zip";
-        LogUtil.info("Full path proxy" + fullPath);
-        options.addExtensions(new File(fullPath));
-
+        if (proxyName != null) {
+            String relativePath = "/classes/" + proxyName;
+            String fullPath = path + relativePath + ".zip";
+            LogUtil.info("Full path proxy" + fullPath);
+            options.addExtensions(new File(fullPath));
+        }
         ChromeDriver driver = new ChromeDriver(options);
         driver.manage().window().maximize();
         return driver;

@@ -6,7 +6,6 @@ import org.openqa.selenium.interactions.Actions;
 import org.youtube.entities.ChannelVideo;
 import org.youtube.entities.YoutubeAccount;
 import org.youtube.google.GoogleScenario;
-import org.youtube.storage.YoutubeDatabases;
 import org.youtube.util.CommonUtil;
 import org.youtube.util.DriverUtil;
 import org.youtube.youtube.YouTubeException;
@@ -28,7 +27,6 @@ public class MainRunnable implements Runnable {
 
     private WebDriver driver;
     private GoogleScenario googleScenario;
-    private YoutubeDatabases databases;
     private YouTubeScenario youTubeScenario;
     private final boolean isSpamView;
     private final boolean needEthernet;
@@ -37,14 +35,12 @@ public class MainRunnable implements Runnable {
     private boolean runningAd;
 
     public MainRunnable(CountDownLatch countDownLatch, YoutubeAccount account,
-                        YoutubeDatabases databases,
                         List<ChannelVideo> videos, boolean isSpamView, boolean needEthernet) {
         this.countDownLatch = countDownLatch;
         this.account = account;
         this.videos = videos;
         this.isSpamView = isSpamView;
         this.needEthernet = needEthernet;
-        this.databases = databases;
     }
 
     @Override
@@ -82,7 +78,7 @@ public class MainRunnable implements Runnable {
     }
 
     private String findProxyForAccount() {
-        boolean needEthernet =  !account.isFake();
+        boolean needEthernet = !account.isFake();
         if (needEthernet)
             return "proxy_full_" + new Random().nextInt(3);
         else

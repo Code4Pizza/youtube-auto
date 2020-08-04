@@ -4,6 +4,7 @@ import io.vavr.collection.Stream;
 import org.youtube.entities.ChannelVideo;
 import org.youtube.entities.YoutubeAccount;
 import org.youtube.entities.YoutubeChannel;
+import org.youtube.script.SearchVideoScript;
 import org.youtube.storage.YoutubeDatabases;
 import org.youtube.util.LogUtil;
 import org.youtube.util.StorageUtil;
@@ -57,9 +58,9 @@ public class SpamViewProc {
 
         for (YoutubeAccount youtubeAccount : youtubeAccounts) {
             // moi account se chay mot thread
-                executor.execute(new MainRunnable(countDownLatch, youtubeAccount, youtubeDatabases,
-                        prepareVideos(),
+                executor.execute(new SearchVideoScript(countDownLatch, youtubeAccount, prepareVideos(),
                         isSpamView, !youtubeAccount.isFake()));
+                break;
         }
 
         try {
@@ -98,6 +99,6 @@ public class SpamViewProc {
     public static void main(String[] args) {
         LogUtil.init("main_log");
         SpamViewProc mainScript = new SpamViewProc();
-        mainScript.playMainScenario(true);
+        mainScript.playMainScenario(false);
     }
 }
