@@ -1,5 +1,7 @@
 package org.youtube.youtube;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -12,9 +14,10 @@ import org.youtube.util.Constants;
 import org.youtube.util.LogUtil;
 
 import java.util.List;
+import java.util.Random;
 
-import static org.youtube.util.LogUtil.info;
-import static org.youtube.util.LogUtil.warning;
+import static org.youtube.util.CommonUtil.scrollDown;
+import static org.youtube.util.LogUtil.*;
 
 public class YouTubeScenario {
 
@@ -46,14 +49,14 @@ public class YouTubeScenario {
             e.printStackTrace();
         }
 
-        attempToLike();
+        attemptToLike();
         try {
             Thread.sleep(2 * 1000);
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        attempToSubscribe();
+        attemptToSubscribe();
         try {
 
             Thread.sleep(Math.min(video.getDuration() * 400, DEFAULT_DELAY / 2));
@@ -86,7 +89,7 @@ public class YouTubeScenario {
         }
     }
 
-    private void attempToLike() {
+    private void attemptToLike() {
         CommonUtil.pause(5);
         List<WebElement> elements = driver.findElements(By.xpath("//*[@id=\"button\"]"));
         for (WebElement e : elements) {
@@ -103,7 +106,7 @@ public class YouTubeScenario {
         }
     }
 
-    private void attempToSubscribe() {
+    private void attemptToSubscribe() {
         CommonUtil.pause(5);
         List<WebElement> subElements = driver.findElements(By.className("ytd-subscribe-button-renderer"));
         for (WebElement e : subElements) {
@@ -116,205 +119,233 @@ public class YouTubeScenario {
         }
     }
 
-    private long getVideoDuration() {
-        try {
-            String time = driver.findElement(By.className("ytp-time-duration")).getText();
-            // mm:ss
-            String[] units = time.split(":");
-            int minutes = Integer.parseInt(units[0]);
-            int seconds = Integer.parseInt(units[1]);
-            int offset = 2;
-            return (60 * minutes + seconds + offset) * 1000;
-        } catch (Exception e) {
-            // Unknown duration
-            return DEFAULT_DELAY;
-        }
-    }
-
-    public void attemptToSearch(String title, String channelName) {
+    public void attemptToSearchByVideoTitle(String title, String channelName) {
         try {
             driver.get(YOUTUBE_URL);
 
-            By search = By.id("search");
-            WebDriverWait wait = new WebDriverWait(driver, 7);
-            wait.until(ExpectedConditions.invisibilityOfElementLocated(search));
-
-            List<WebElement> searchInputs = driver.findElements(search);
-            WebElement searchInput = null;
-
-            for (WebElement element : searchInputs) {
-                if ("search_query".equals(element.getAttribute("name"))) {
-                    searchInput = element;
-                    break;
-                }
-            }
-
+            WebElement searchInput = CommonUtil.waitSearchShow(driver);
             if (searchInput == null) {
+                severe("Không tìm thấy ô tìm kiếm !");
                 return;
             }
 
-            CommonUtil.enterKeys(searchInput, title);
-            searchInput.sendKeys(Keys.RETURN);
-            CommonUtil.pause(2);
+            enterSearchKey(searchInput, title);
 
             List<WebElement> videoTitles = driver.findElements(By.id("video-title"));
-
             List<WebElement> channels = driver.findElements(By.id("channel-name"));
 
-            WebElement channelElement = null;
-            WebElement titleElement = null;
-            int channelIndex = 0;
-            int titleIndex = 0;
+            Pair<Pair<Integer, WebElement>, WebElement> pair = findChannelInSearchResultScreen(
+                    channels,
+                    videoTitles,
+                    channelName
+            );
 
-            for (WebElement element : channels) {
-                if (!element.getText().isEmpty()) {
-                    if (element.getText().equals(channelName)) {
-                        warning("Index" + channelIndex + " Channel" + element.getText());
-                        channelElement = element;
-                        break;
-                    }
-                    channelIndex++;
-                }
-            }
-            for (WebElement element : videoTitles) {
-                if (!element.getText().isEmpty()) {
-                    if (channelElement != null && channelIndex == titleIndex) {
-                        titleElement = element;
-                        info("Index" + titleIndex + " Title" + element.getText());
-                        break;
-                    }
-                    titleIndex++;
-                }
-            }
+            CommonUtil.pause(1);
 
-            CommonUtil.pause(2);
-            JavascriptExecutor js = (JavascriptExecutor) driver;
-
-            if (channelElement != null) {
-                for (int i = 0; i < channelIndex / 8; i++) {
-                    scrollDown(driver);
-                }
-                CommonUtil.pause(1);
-                js.executeScript("arguments[0].scrollIntoView();", channelElement);
-                scrollUp(driver);
-
-                if (titleElement != null) {
-                    info("Click open video");
-                    Actions actions = new Actions(driver);
-                    actions.moveToElement(titleElement).click().perform();
-                }
-            }
+            loadAndClickVideoSearched(3, pair, channelName);
 
         } catch (RuntimeException e) {
             e.printStackTrace();
         }
     }
 
-    /**
-     * scrollDown() method scrolls down the page.
-     *
-     * @return void
-     */
-    public void scrollDown(WebDriver driver) {
-        try {
-            int i = 0;
-            for (; i <= 30; i++) {
-                ((JavascriptExecutor) driver).executeScript(("window.scrollBy(0," + i + ")"), "");
+    public Pair<Pair<Integer, WebElement>, WebElement> findChannelInSearchResultScreen(
+            List<WebElement> channels,
+            List<WebElement> videoTitles,
+            String channelName) {
+
+        WebElement channelElement = null;
+        WebElement titleElement = null;
+        int channelIndex = 0;
+        int titleIndex = 0;
+
+        for (WebElement element : channels) {
+            if (!element.getText().isEmpty()) {
+                try {
+                    // Tìm span để tránh count index cái clip mix
+                    WebElement span = element.findElement(By.className("yt-simple-endpoint"));
+                } catch (NoSuchElementException ignored) {
+                    continue;
+                }
+                if (element.getText().equals(channelName)) {
+                    warning("Index " + channelIndex + " Channel " + element.getText());
+                    channelElement = element;
+                    break;
+                }
+                channelIndex++;
             }
-            for (; i > 0; i--) {
-                ((JavascriptExecutor) driver).executeScript(("window.scrollBy(0," + i + ")"), "");
-            }
-        } catch (WebDriverException wde) {
-        } catch (Exception e) {
         }
-    }
-
-    /**
-     * scrollUp() method scrolls up the page.
-     *
-     * @return void
-     */
-    public void scrollUp(WebDriver driver) {
-        try {
-            int i = 0;
-            for (; i > -20; i--) {
-                ((JavascriptExecutor) driver).executeScript(("window.scrollBy(0," + i + ")"), "");
+        for (WebElement element : videoTitles) {
+            if (!element.getText().isEmpty() && element.getAttribute("href") != null) {
+                if (channelElement != null && channelIndex == titleIndex) {
+                    titleElement = element;
+                    warning("Index " + titleIndex + " Title " + element.getText());
+                    break;
+                }
+                titleIndex++;
             }
-            for (; i < 0; i++) {
-                ((JavascriptExecutor) driver).executeScript(("window.scrollBy(0," + i + ")"), "");
-            }
-        } catch (WebDriverException wde) {
-        } catch (Exception e) {
         }
+
+        if (channelElement != null) {
+            Pair<Integer, WebElement> eChannel = new ImmutablePair<>(channelIndex, channelElement);
+            Pair<Integer, WebElement> eTitle = new ImmutablePair<>(titleIndex, titleElement);
+            return new ImmutablePair<>(eChannel, titleElement);
+        }
+        return null;
     }
 
+    public void loadAndClickVideoSearched(int numberAttempt, Pair<Pair<Integer, WebElement>, WebElement> pair, String channelName) {
+        if (pair == null) {
+            warning("Chưa thấy kênh cần tìm");
+            if (numberAttempt == 0) {
+                warning("Kết thúc tìm kiếm, không có kết quả");
+                return;
+            }
+            warning("Số lần thử tìm còn lại : " + numberAttempt);
 
-    public static void printElement(WebElement element) {
-        logger.info(String.format("Tag name: %s, text: %s",
-                element.getTagName(), element.getText()));
+            // Loadmore
+            for (int i = 0; i < 4; i++) {
+                scrollDown(driver);
+            }
+
+            List<WebElement> videoTitles = driver.findElements(By.id("video-title"));
+            List<WebElement> channels = driver.findElements(By.id("channel-name"));
+
+            Pair<Pair<Integer, WebElement>, WebElement> newPair = findChannelInSearchResultScreen(channels, videoTitles, channelName);
+            loadAndClickVideoSearched(--numberAttempt, newPair, channelName);
+        } else {
+            warning("Tìm thấy kênh");
+
+            int channelIndex = pair.getLeft().getLeft();
+            WebElement channelElement = pair.getLeft().getRight();
+            WebElement titleElement = pair.getRight();
+
+            for (int i = 0; i < (channelIndex - (numberAttempt * 4)) / 8; i++) {
+                scrollDown(driver);
+            }
+
+            CommonUtil.pause(1);
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+            js.executeScript("arguments[0].scrollIntoView();", channelElement);
+            CommonUtil.pause(1);
+
+            if (titleElement != null) {
+                info("Click open video");
+                Actions actions = new Actions(driver);
+                actions.moveToElement(titleElement).click().perform();
+            }
+        }
+
     }
 
-//	boolean isAdShowing = false;
-//
-//	private Thread adThread;
-//
-//	private int adCount = 0;
+    public void attemptToSearchByChannelName(String channelName) {
+        driver.get(YOUTUBE_URL);
 
-//	private void findingAds() {
-//		adThread = new Thread(runable);
-//		adThread.start();
-//	}
-//
-//	private Runnable runable = new Runnable() {
-//
-//		@Override
-//		public void run() {
-//			// TODO Auto-generated method stub
-//			logger.info("Waiting ad show");
-//			CommonUtil.pause(10);
-//			WebElement adButton = CommonUtil.waitAdShow(driver, "ytp-ad-button-text", null);
-//			if (adButton != null) {
-//				logger.info("Found Ads, Click it");
-//				CommonUtil.pause(new Random().nextInt(3) + 1);
-//
-//				Actions actions = new Actions(driver);
-//
-//				actions.moveToElement(adButton).click().perform();
-//
-////				adButton.click();
-//
-//				CommonUtil.pause(5);
-//
-//				Set<String> sets = driver.getWindowHandles();
-//				List<String> lists = new ArrayList<String>();
-//				for (String tab : sets) {
-////					logger.info(tab);
-//					lists.add(tab);
-//				}
-//
-//				if (lists.size() > 1) {
-//					adCount++;
-//					logger.info("Click ad success " + adCount);
-//					driver.switchTo().window(lists.get(0));
-//					CommonUtil.pause(1);
-//					try {
-//						attempToPlay();
-//					} catch (YouTubeFailedToPlayException e) {
-//						// TODO Auto-generated catch block
-////						e.printStackTrace();
-//					}
-//				}
-////				driver.close();
-//			} else {
-//				logger.info("Time out waiting ads   ");
-//			}
-//
-//			
-//			CommonUtil.pause(30);
-//			
-//			adThread = new Thread(this);
-//			adThread.start();
-//
-//		}
-//	};
+        WebElement searchInput = CommonUtil.waitSearchShow(driver);
+        if (searchInput == null) {
+            severe("Không tìm thấy ô tìm kiếm !");
+            return;
+        }
+
+        enterSearchKey(searchInput, channelName);
+
+        List<WebElement> elements = driver.findElements(By.id("text"));
+
+        for (int i = 0; i < elements.size(); i++) {
+            WebElement ele = elements.get(i);
+            if (!ele.getText().isEmpty()) {
+                try {
+                    WebElement aTag = ele.findElement(By.tagName("a"));
+                } catch (NoSuchElementException e) {
+//                    info(ele.getText());
+                    if (ele.getText().equals(channelName)) {
+                        info("Click vào channel");
+                        ele.click();
+                        CommonUtil.pause(5);
+                        break;
+                    }
+                }
+            }
+        }
+
+        WebElement scrollContainer = CommonUtil.waitElement(driver, By.id("tabsContent"), null);
+        if (scrollContainer != null) {
+            List<WebElement> e = scrollContainer.findElements(By.tagName("paper-tab"));
+            warning("Size " + e.size());
+            int indexVideos = 1;
+            for (int i = 0; i < e.size(); i++) {
+                warning("Text " + e.get(i).getText());
+                if (indexVideos == i) {
+                    e.get(i).click();
+                    CommonUtil.pause(1);
+                    WebElement grid = CommonUtil.waitElement(driver, By.tagName("ytd-grid-renderer"), null);
+                    if (grid != null) {
+                        WebElement items = grid.findElement(By.id("items"));
+                        if (items != null) {
+                            List<WebElement> videos = items.findElements(By.tagName("ytd-grid-video-renderer"));
+                            warning("Size videos " + videos.size());
+                            for (WebElement video : videos) {
+                                if (video.getText().isEmpty()) {
+                                    continue;
+                                }
+                                CommonUtil.pause(3);
+                                warning(video.getText());
+                                if (new Random().nextBoolean()) {
+                                    video.click();
+                                }
+                                // TODO lay video duration để pause ?
+                                CommonUtil.pause(20);
+                                // Back ve tab videos chuyen sang video khac
+                                driver.navigate().back();
+                            }
+                        } else {
+                            warning("Items not found");
+                        }
+                    } else  {
+                        warning("Grid not found");
+                    }
+                    break;
+                }
+            }
+        }
+//        WebElement scrollContainer = CommonUtil.waitElement(driver, By.id("scroll-container"), null);
+//        if (scrollContainer != null) {
+//            WebElement items = CommonUtil.waitElement(driver, By.id("items"), null);
+//            if (items != null) {
+//                List<WebElement> videos = items.findElements(By.className("style-scope"));
+//                warning("Video number " + videos.size());
+//                for (int i = 0; i < videos.size(); i++) {
+//                    WebElement video = videos.get(i);
+//                    if (!video.getText().isEmpty()) {
+//                        info(video.getText());
+//                        video.click();
+//                        CommonUtil.pause(10);
+//                    }
+//                }
+//            } else {
+//                warning("không thấy video trong kênh");
+//            }
+//        } else {
+        // Tìm trên UI khác xem
+//            warning("không thấy scroll container trong kênh");
+//            WebElement content = CommonUtil.waitElement(driver, By.id("content"), null);
+//            if (content != null) {
+//                List<WebElement> videos = content.findElements(By.className("style-scope"));
+//                info("Video number " + videos.size());
+//                for (int i = 0; i < videos.size(); i++) {
+//                    WebElement video = videos.get(i);
+//                    info(video.getText());
+//                }
+//            }
+//        }
+
+    }
+
+    private void enterSearchKey(WebElement searchInput, String key) {
+        info("Nhập từ khoá tìm kiếm : " + key);
+        searchInput.click();
+        CommonUtil.enterKeys(searchInput, key);
+        searchInput.sendKeys(Keys.RETURN);
+        CommonUtil.pause(2);
+    }
 }

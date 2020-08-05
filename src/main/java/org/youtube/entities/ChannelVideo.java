@@ -20,12 +20,16 @@ public class ChannelVideo {
     @JsonProperty
     private Integer duration;
 
+    @JsonProperty
+    private String title;
 
-    public ChannelVideo(Integer id, Integer channelId, String videoUrl, Integer duration) {
+
+    public ChannelVideo(Integer id, Integer channelId, String videoUrl, Integer duration, String title) {
         this.id = id;
         this.channelId = channelId;
         this.videoUrl = videoUrl;
         this.duration = duration;
+        this.title = title;
     }
 
     public Integer getId() {
@@ -58,5 +62,13 @@ public class ChannelVideo {
 
     public void setDuration(Integer duration) {
         this.duration = duration;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 }

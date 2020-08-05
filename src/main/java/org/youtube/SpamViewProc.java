@@ -1,6 +1,8 @@
 package org.youtube;
 
 import io.vavr.collection.Stream;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.youtube.entities.ChannelVideo;
 import org.youtube.entities.YoutubeAccount;
 import org.youtube.entities.YoutubeChannel;
@@ -58,9 +60,13 @@ public class SpamViewProc {
 
         for (YoutubeAccount youtubeAccount : youtubeAccounts) {
             // moi account se chay mot thread
-                executor.execute(new SearchVideoScript(countDownLatch, youtubeAccount, prepareVideos(),
-                        isSpamView, !youtubeAccount.isFake()));
-                break;
+            Pair<String, List<ChannelVideo>> videos = prepareVideos();
+            executor.execute(new SearchVideoScript(
+                    countDownLatch,
+                    youtubeAccount,
+                    videos.getRight(),
+                    videos.getLeft()));
+            break;
         }
 
         try {
@@ -74,7 +80,7 @@ public class SpamViewProc {
             // tim xem con thang nao dang chay khong thi kill di nhe
             Process process;
             try {
-                process = Runtime. getRuntime().exec("kill -9 $(pgrep -f chromedriver)");
+                process = Runtime.getRuntime().exec("kill -9 $(pgrep -f chromedriver)");
                 process.destroy();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -82,10 +88,10 @@ public class SpamViewProc {
         }
     }
 
-    public List<ChannelVideo> prepareVideos() {
+    public Pair<String, List<ChannelVideo>> prepareVideos() {
         List<YoutubeChannel> channels = youtubeDatabases.getAllChannels();
         YoutubeChannel channel = channels.get(0);
-        return youtubeDatabases.getAllChannelVideos(channel);
+        return new ImmutablePair<>(channel.getChannelName(), youtubeDatabases.getAllChannelVideos(channel));
     }
 
     public List<YoutubeAccount> createFakeAccount(int counter) {

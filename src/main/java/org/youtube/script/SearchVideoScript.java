@@ -1,6 +1,7 @@
 package org.youtube.script;
 
 import org.openqa.selenium.WebDriver;
+import org.youtube.AdRunnable;
 import org.youtube.SpamViewProc;
 import org.youtube.entities.ChannelVideo;
 import org.youtube.entities.YoutubeAccount;
@@ -11,6 +12,7 @@ import org.youtube.util.ProxyUtil;
 import org.youtube.youtube.YouTubeScenario;
 
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
 import static org.youtube.util.LogUtil.info;
@@ -23,16 +25,20 @@ public class SearchVideoScript implements Runnable {
     private final CountDownLatch countDownLatch;
     private final YoutubeAccount account;
     private final List<ChannelVideo> videos;
+    private final String channelName;
 
     private WebDriver driver;
     private GoogleScenario googleScenario;
     private YouTubeScenario youTubeScenario;
 
+    private Thread adThread;
+
     public SearchVideoScript(CountDownLatch countDownLatch, YoutubeAccount account, List<ChannelVideo> videos,
-                             boolean isSpamView, boolean needEthernet) {
+                             String channelName) {
         this.countDownLatch = countDownLatch;
         this.account = account;
         this.videos = videos;
+        this.channelName = channelName;
     }
 
     @Override
@@ -48,13 +54,18 @@ public class SearchVideoScript implements Runnable {
                 googleScenario.goGoogleSignInPageThrough3rdParty();
                 googleScenario.attemptToLogin(account);
             }
-            // TODO running finding Ads
-            for (ChannelVideo video : videos) {
-                // TODO lưu từ khoá search và tên kênh
-                youTubeScenario.attemptToSearch("Heart and soul", "Howie");
-                CommonUtil.pause(3);
+            findingAds();
+            if (new Random().nextBoolean()) {
+                // Xem video bằng cách nhập từ khoá search tên video
+                for (ChannelVideo video : videos) {
+                    youTubeScenario.attemptToSearchByVideoTitle(video.getTitle(), "Bone Wild TV");
+                    CommonUtil.pause(3);
+                    break;
+                }
+            } else {
+                // Search tên channel
+                youTubeScenario.attemptToSearchByChannelName(channelName.trim());
             }
-
         } catch (Exception e) {
             e.printStackTrace();
             warning(e.getMessage());
@@ -63,10 +74,22 @@ public class SearchVideoScript implements Runnable {
         } finally {
             info("==================End of acc " + account.getEmail() + "==================");
             SpamViewProc.increaseNumberAttempt();
-            // TODO stop finding Ads
+            stopFindingAds();
             countDownLatch.countDown();
             CommonUtil.pause(1);
-//            driver.quit();
+            driver.quit();
         }
     }
+
+    private void findingAds() {
+        adThread = new Thread(new AdRunnable(driver, youTubeScenario, account.isFake()), AD_THREAD);
+        adThread.start();
+    }
+
+    private void stopFindingAds() {
+        if (adThread != null && adThread.isAlive()) {
+            adThread.interrupt();
+        }
+    }
+
 }

@@ -14,6 +14,7 @@ public class VideoRowMapper implements RowMapper<ChannelVideo> {
     return new ChannelVideo(resultSet.getInt("id"),
             resultSet.getInt("channel_id"),
             resultSet.getString("video_url"),
-            resultSet.getInt("duration"));
+            resultSet.getInt("duration"),
+            resultSet.getString("title"));
   }
 }
