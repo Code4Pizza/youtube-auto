@@ -44,7 +44,7 @@ public class SearchVideoScript implements Runnable {
     @Override
     public void run() {
         String proxyName = ProxyUtil.findProxyForAccount(!account.isFake());
-        driver = DriverUtil.initChrome(null);
+        driver = DriverUtil.initChrome(proxyName);
         googleScenario = new GoogleScenario(driver);
         youTubeScenario = new YouTubeScenario(driver);
 
@@ -55,16 +55,24 @@ public class SearchVideoScript implements Runnable {
                 googleScenario.attemptToLogin(account);
             }
             findingAds();
+
+            /*
+             * Dat lam 4 case cho nay
+             * 1: tim kiem tu kenh ra, sau do vao danh sach clip, xem clip minh muon
+             * 2: tim kiem theo ten clip, cung voi ten kenh
+             * 3: vao thang url clip do
+             * 4: xem bang danh sach phat tren youtube, trong qua trinh play tu dong hoac click bang tay trong list ben phai
+             * */
             if (new Random().nextBoolean()) {
                 // Xem video bằng cách nhập từ khoá search tên video
                 for (ChannelVideo video : videos) {
-                    youTubeScenario.attemptToSearchByVideoTitle(video.getTitle(), "Bone Wild TV");
-                    CommonUtil.pause(3);
+                    youTubeScenario.attemptToSearchByVideoTitle(video.getTitle(), channelName);
+                    CommonUtil.pause(5);
                     break;
                 }
             } else {
                 // Search tên channel
-                youTubeScenario.attemptToSearchByChannelName(channelName.trim());
+                youTubeScenario.attemptToSearchByChannelName(channelName.trim(), null);
             }
         } catch (Exception e) {
             e.printStackTrace();

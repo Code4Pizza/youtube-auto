@@ -24,7 +24,7 @@ import static org.youtube.util.LogUtil.info;
 
 public class SpamViewProc {
 
-    ExecutorService executor = Executors.newFixedThreadPool(3);
+    ExecutorService executor = Executors.newFixedThreadPool(1);
 
     protected final YoutubeDatabases youtubeDatabases = StorageUtil.getAccDatabase();
 
@@ -90,7 +90,7 @@ public class SpamViewProc {
 
     public Pair<String, List<ChannelVideo>> prepareVideos() {
         List<YoutubeChannel> channels = youtubeDatabases.getAllChannels();
-        YoutubeChannel channel = channels.get(0);
+        YoutubeChannel channel = channels.get(1);
         return new ImmutablePair<>(channel.getChannelName(), youtubeDatabases.getAllChannelVideos(channel));
     }
 

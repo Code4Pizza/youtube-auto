@@ -7,7 +7,9 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.youtube.entities.YoutubeAccount;
+import org.youtube.storage.YoutubeDatabases;
 import org.youtube.util.CommonUtil;
+import org.youtube.util.StorageUtil;
 
 import java.util.Collections;
 import java.util.List;
@@ -22,9 +24,11 @@ public class GoogleScenario {
     public static final String GOOGLE_SIGN_IN_3RD_PARTY = "https://stackoverflow.com/users/login?ssrc=head&returnurl=https%3a%2f%2fstackoverflow.com%2f";
 
     private final WebDriver driver;
+//    private final YoutubeDatabases databases;
 
     public GoogleScenario(WebDriver driver) {
         this.driver = driver;
+//        this.databases = databases;
     }
 
     public void goGoogleSignInPage() throws GoogleException {
@@ -163,10 +167,9 @@ public class GoogleScenario {
             }
 
         }
-        info("Account " + account.getEmail() + " successfully signed in");
 
-//		System.out.println("Writing cookies");
-//		CookiesUtil.writeCookies(driver);
+        info("Account " + account.getEmail() + " successfully signed in");
+        // updatedb trang thai dang nhap cua user
     }
 
     public void attemptSignOut() throws GoogleException {

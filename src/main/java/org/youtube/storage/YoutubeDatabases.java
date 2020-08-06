@@ -136,4 +136,17 @@ public class YoutubeDatabases {
     }
 
 
+    public boolean insertUserLogin() {
+        String sql = "INSERT INTO yt_bot.user_proxy_usage\n" +
+                "(user_id, proxy_id, login_time, logout_time)\n" +
+                "VALUES(:userId, :proxyId, :loginTime, :logoutTime);\n";
+
+        return database.with(jdbi -> jdbi.withHandle(handle -> {
+            try (Timer.Context ignored = getAllAccountsTimer.time()) {
+                return handle.createUpdate(sql)
+                        .execute() > 0;
+            }
+        }));
+    }
+
 }

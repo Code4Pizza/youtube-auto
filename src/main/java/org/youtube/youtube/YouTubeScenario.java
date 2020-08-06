@@ -238,7 +238,7 @@ public class YouTubeScenario {
 
     }
 
-    public void attemptToSearchByChannelName(String channelName) {
+    public void attemptToSearchByChannelName(String channelName, String videoName) {
         driver.get(YOUTUBE_URL);
 
         WebElement searchInput = CommonUtil.waitSearchShow(driver);
@@ -251,8 +251,7 @@ public class YouTubeScenario {
 
         List<WebElement> elements = driver.findElements(By.id("text"));
 
-        for (int i = 0; i < elements.size(); i++) {
-            WebElement ele = elements.get(i);
+        for (WebElement ele : elements) {
             if (!ele.getText().isEmpty()) {
                 try {
                     WebElement aTag = ele.findElement(By.tagName("a"));
