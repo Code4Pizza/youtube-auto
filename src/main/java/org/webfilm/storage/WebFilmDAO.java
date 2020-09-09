@@ -23,7 +23,7 @@ public interface WebFilmDAO {
     List<Channel> getChannels();
 
     @SqlUpdate("UPDATE videos SET `name`=:name, description=:description, duration=:duration, url=:url, views=:views, bg_image=:bg_image WHERE youtube_id=:youtube_id")
-    int updateVideo(@Bind("name") String name, @Bind("description") String description, @Bind("duration") int duration,
+    void updateVideo(@Bind("name") String name, @Bind("description") String description, @Bind("duration") int duration,
                     @Bind("url") String url, @Bind("views") int views, @Bind("bg_image") String bgImage, @Bind("youtube_id") String youtubeId);
 
     @SqlUpdate("INSERT INTO videos(`name`, description, duration, url, views, bg_image, youtube_id) " +
@@ -37,5 +37,8 @@ public interface WebFilmDAO {
     @SqlUpdate("UPDATE channels SET `name`=:name, description=:description, avatar=:avatar, subscribers=:subscribers WHERE youtube_id=:youtube_id")
     int updateChannelInfo(@Bind("name") String name, @Bind("description") String description, @Bind("avatar") String avatar,
                           @Bind("subscribers") int subscribers, @Bind("youtube_id") String youtubeId);
+
+    @SqlUpdate("UPDATE channels SET updated_time=:updated_time WHERE youtube_id=:youtube_id")
+    int updateChannelUpdatedTime(@Bind("updated_time") String updatedTime, @Bind("youtube_id") String youtubeId);
 
 }

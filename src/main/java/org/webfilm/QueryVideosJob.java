@@ -1,6 +1,8 @@
 package org.webfilm;
 
 import org.webfilm.api.ApiService;
+import org.webfilm.api.RetryException;
+import org.webfilm.api.RunOutKeyException;
 import org.webfilm.entity.Channel;
 import org.webfilm.entity.ParsedConfig;
 import org.webfilm.storage.WebFilmDatabase;
@@ -10,6 +12,8 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import static org.webfilm.util.DateUtil.isChannelUpToDate;
 
 public class QueryVideosJob {
 
@@ -37,7 +41,7 @@ public class QueryVideosJob {
         this.database = database;
     }
 
-    public void run() {
+    public void run() throws RetryException, RunOutKeyException {
         System.out.println("Start query videos job");
 
         List<Channel> channels = database.getChannels();
@@ -52,7 +56,14 @@ public class QueryVideosJob {
         }
 
         CountDownLatch jobCountDown = new CountDownLatch(channels.size());
+        int crawlerTime = configs.getCrawlerTime();
         for (Channel channel : channels) {
+            if (isChannelUpToDate(crawlerTime, channel.getUpdatedTime())) {
+                jobCountDown.countDown();
+                System.out.println("Countdown task " + jobCountDown.getCount());
+                System.out.println("Channel " + channel.getName() + "is up to date, ignore videos querying");
+                continue;
+            }
             executor.execute(new QueryVideoJob(jobCountDown, apiService, database, channel));
         }
         try {
@@ -63,7 +74,7 @@ public class QueryVideosJob {
         System.out.println("Query videos job finished");
     }
 
-    private void updateChannelInfo(List<Channel> channels) throws IOException {
+    private void updateChannelInfo(List<Channel> channels) throws IOException, RetryException, RunOutKeyException {
         StringBuilder listQueryChannelId = new StringBuilder();
         for (int i = 0; i < channels.size(); i++) {
             listQueryChannelId.append(channels.get(i).getYoutubeId());
@@ -83,10 +94,20 @@ public class QueryVideosJob {
     public static void main(String[] args) {
         QueryVideosJob job = QueryVideosJob.getInstance();
         while (true) {
+            System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+            System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
             try {
-                System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-                System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
                 job.run();
+            } catch (RetryException e) {
+                e.printStackTrace();
+                // Apply new api key, re-run job immediately
+                continue;
+            } catch (RunOutKeyException e) {
+                e.printStackTrace();
+                // TODO sleep 1 day
+                break;
+            }
+            try {
                 // Waiting for amount of config time to start again
                 Thread.sleep(job.configs.getCrawlerTime());
             } catch (InterruptedException e) {

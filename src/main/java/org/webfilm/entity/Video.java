@@ -90,11 +90,11 @@ public class Video {
     @Override
     public String toString() {
         return "Video{" +
-                "id=" + id +
+//                "id=" + id +
                 ", name='" + name + '\'' +
                 ", duration=" + duration +
-                ", bgImage='" + bgImage + '\'' +
-                ", url='" + url + '\'' +
+//                ", bgImage='" + bgImage + '\'' +
+//                ", url='" + url + '\'' +
                 ", views=" + views +
                 ", youtubeId='" + youtubeId + '\'' +
 //                ", description='" + description + '\'' +

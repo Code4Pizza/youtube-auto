@@ -106,4 +106,12 @@ public class WebFilmDatabase {
             }
         }));
     }
+
+    public void updateChannelUpdatedTime(String updatedTime, String youtubeId) {
+        database.with(jdbi -> jdbi.withHandle(handle -> {
+            try (Timer.Context ignored = defaultTimer.time()) {
+                return handle.attach(WebFilmDAO.class).updateChannelUpdatedTime(updatedTime, youtubeId);
+            }
+        }));
+    }
 }

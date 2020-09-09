@@ -6,6 +6,7 @@ import org.joda.time.format.ISOPeriodFormat;
 import org.webfilm.entity.Channel;
 import org.webfilm.entity.ParsedConfig;
 import org.webfilm.entity.Video;
+import org.webfilm.util.DateUtil;
 
 import javax.annotation.Nonnull;
 import java.io.BufferedReader;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ApiService {
 
@@ -30,6 +32,8 @@ public class ApiService {
     private final ParsedConfig parsedConfig;
     private final Gson gson;
 
+    private final AtomicInteger availableApiKeyIndex = new AtomicInteger(0);
+
     public ApiService(ParsedConfig parsedConfig) {
         this.parsedConfig = parsedConfig;
         GsonBuilder gsonBuilder = new GsonBuilder();
@@ -38,10 +42,6 @@ public class ApiService {
         gsonBuilder.registerTypeAdapter(Video.class, videoJsonDeserializer);
         gsonBuilder.registerTypeAdapter(Channel.class, channelJsonDeserializer);
         this.gson = gsonBuilder.create();
-    }
-
-    public ParsedConfig getParsedConfig() {
-        return parsedConfig;
     }
 
     private static Video deserializeVideo(JsonElement json, Type type, JsonDeserializationContext context) {
@@ -79,7 +79,8 @@ public class ApiService {
             JsonObject detailObject = itemObject.getAsJsonObject("contentDetails");
             // "PT1H1M13S"
             String formattedDuration = detailObject.get("duration").getAsString();
-            duration = (int) Period.parse(formattedDuration, ISOPeriodFormat.standard()).toStandardDuration().getMillis();
+            duration = (int) Period.parse(formattedDuration, ISOPeriodFormat.standard())
+                    .toStandardDuration().getMillis() / 1000;
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Failed to fetch contentDetails of " + youtubeId);
@@ -136,14 +137,18 @@ public class ApiService {
         return new Channel(name, youtubeUrl, youtubeId, description, avatar, subscribers);
     }
 
-    public String makeServiceRequest(String path, @Nonnull Map<String, String> headers) throws IOException {
+    public String makeServiceRequest(String path, @Nonnull Map<String, String> headers) throws IOException, RetryException, RunOutKeyException {
         return makeServiceRequest(path, "GET", headers);
     }
 
-    public String makeServiceRequest(String path, String method, @Nonnull Map<String, String> headers) throws IOException {
+    public String makeServiceRequest(String path, String method, @Nonnull Map<String, String> headers) throws IOException, RetryException, RunOutKeyException {
         try {
             StringBuilder query = new StringBuilder();
-            query.append(String.format("key=%s", parsedConfig.getYoutubeApiKey()));
+            String[] apiKeys = parsedConfig.getYoutubeApiKey();
+            if (apiKeys.length < availableApiKeyIndex.get() + 1) {
+                throw new RunOutKeyException();
+            }
+            query.append(String.format("key=%s", apiKeys[availableApiKeyIndex.get()]));
             for (Map.Entry<String, String> entry : headers.entrySet()) {
                 query.append("&");
                 query.append(String.format("%s=%s", entry.getKey(), entry.getValue()));
@@ -162,6 +167,12 @@ public class ApiService {
             int status = con.getResponseCode();
 
             Reader streamReader;
+
+            if (status == 403) {
+                // Api key exceed limit
+                availableApiKeyIndex.incrementAndGet();
+                throw new RetryException("Api key exceed limit");
+            }
 
             if (status > 299) {
                 streamReader = new InputStreamReader(con.getErrorStream());
@@ -183,7 +194,7 @@ public class ApiService {
         }
     }
 
-    public List<Channel> getChannelInfos(String listQueryChannelId) throws IOException {
+    public List<Channel> getChannelInfos(String listQueryChannelId) throws IOException, RetryException, RunOutKeyException {
         Map<String, String> query = new HashMap<>();
         query.put("id", listQueryChannelId);
         query.put("part", "snippet,statistics");
@@ -201,7 +212,7 @@ public class ApiService {
         return channels;
     }
 
-    public List<Video> getVideosFromChannel(String channelId) throws IOException {
+    public List<Video> getVideosFromChannel(String channelId) throws IOException, RetryException, RunOutKeyException {
         Map<String, String> query = new HashMap<>();
         String response;
         JsonObject responseJson;
@@ -223,7 +234,8 @@ public class ApiService {
                 JsonObject idObject = item.getAsJsonObject().getAsJsonObject("id");
                 videoId = idObject.get("videoId").getAsString();
             } catch (Exception e) {
-                System.out.println("Item dont have video id " + item.toString());
+                // item contains playlist id
+                // System.out.println("Item don't have video id " + item.toString());
             }
             if (videoId == null) {
                 continue;

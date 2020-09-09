@@ -1,6 +1,7 @@
 package org.webfilm.entity;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 import java.util.List;
 
 public class ParsedConfig {
@@ -12,7 +13,7 @@ public class ParsedConfig {
 
     private int videosLimit;
 
-    private String youtubeApiKey;
+    private String[] youtubeApiKey;
 
     public ParsedConfig(@Nonnull List<Config> configs) {
         for (Config config : configs) {
@@ -24,21 +25,27 @@ public class ParsedConfig {
                     videosLimit = Integer.parseInt(config.getConfigValue());
                     break;
                 case "youtube_api_key":
-                    youtubeApiKey = config.getConfigValue();
+                    if (config.getConfigValue().split(",").length > 0) {
+                        youtubeApiKey = config.getConfigValue().split(",");
+                    } else {
+                        youtubeApiKey = new String[]{config.getConfigValue()};
+                    }
                     break;
             }
         }
     }
 
     public int getCrawlerTime() {
-        return crawlerTime == 0 ? DEFAULT_CRAWLER_TIME : crawlerTime * 1000;
+        int time = crawlerTime == 0 ? DEFAULT_CRAWLER_TIME : crawlerTime * 1000;
+        System.out.println("Crawler time = " + time);
+        return time;
     }
 
     public int getVideosLimit() {
         return videosLimit;
     }
 
-    public String getYoutubeApiKey() {
+    public String[] getYoutubeApiKey() {
         return youtubeApiKey;
     }
 
@@ -47,7 +54,7 @@ public class ParsedConfig {
         return "ParsedConfig{" +
                 "crawlerTime=" + crawlerTime +
                 ", videosLimit=" + videosLimit +
-                ", youtubeApiKey='" + youtubeApiKey + '\'' +
+                ", youtubeApiKey='" + Arrays.toString(youtubeApiKey) + '\'' +
                 '}';
     }
 }

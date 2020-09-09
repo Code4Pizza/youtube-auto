@@ -1,9 +1,12 @@
 package org.webfilm;
 
 import org.webfilm.api.ApiService;
+import org.webfilm.api.RetryException;
+import org.webfilm.api.RunOutKeyException;
 import org.webfilm.entity.Channel;
 import org.webfilm.entity.Video;
 import org.webfilm.storage.WebFilmDatabase;
+import org.webfilm.util.DateUtil;
 
 import java.io.IOException;
 import java.util.List;
@@ -26,7 +29,7 @@ public class QueryVideoJob implements Runnable {
     @Override
     public void run() {
         try {
-            System.out.println("==============> Fetching videos from channel " + channel.getYoutubeId());
+            // System.out.println("==============> Fetching videos from channel " + channel.getName());
             List<Video> videos = apiService.getVideosFromChannel(channel.getYoutubeId());
             int countInserted = 0, countUpdated = 0;
             for (Video video : videos) {
@@ -41,13 +44,20 @@ public class QueryVideoJob implements Runnable {
                     countInserted++;
                 }
             }
+            String updatedTime = DateUtil.convertStringDate(System.currentTimeMillis());
+            database.updateChannelUpdatedTime(updatedTime, channel.getYoutubeId());
             System.out.println("==============> Channel " + channel.getName() + "(id:" + channel.getYoutubeId() + ")" +
                     " fetched " + videos.size() + " videos ( inserted: " + countInserted + ", updated: " + countUpdated + ")");
         } catch (IOException e) {
             System.out.println("==============> Channel " + channel.getName() + "(id:" + channel.getYoutubeId() + ")" +
                     " return error " + e.getMessage());
+        } catch (RetryException e) {
+            System.out.println("Api key exceed limit, wait for re-run job");
+        } catch (RunOutKeyException e) {
+            //
         } finally {
             jobCountDown.countDown();
+            System.out.println("Countdown task " + jobCountDown.getCount());
         }
     }
 }
