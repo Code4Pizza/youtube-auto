@@ -7,6 +7,7 @@ import org.webfilm.storage.WebFilmDatabase;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -19,36 +20,47 @@ public class QueryVideosJob {
             WebFilmDatabase database = WebFilmDatabase.getInstance();
             ParsedConfig configs = database.getSystemConfigs();
             ApiService apiService = new ApiService(configs);
-            INSTANCE = new QueryVideosJob(apiService, database);
+            INSTANCE = new QueryVideosJob(configs, apiService, database);
         }
         return INSTANCE;
     }
 
-    private ExecutorService executor = Executors.newFixedThreadPool(5);
+    private final ExecutorService executor = Executors.newFixedThreadPool(5);
+
+    private final ParsedConfig configs;
     private final ApiService apiService;
     private final WebFilmDatabase database;
 
-    private QueryVideosJob(ApiService apiService, WebFilmDatabase database) {
+    private QueryVideosJob(ParsedConfig configs, ApiService apiService, WebFilmDatabase database) {
+        this.configs = configs;
         this.apiService = apiService;
         this.database = database;
     }
 
     public void run() {
-        List<Channel> channels = database.getChannels();
+        System.out.println("Start query videos job");
 
-        System.out.println("Total channels will fetch videos" + channels.size());
+        List<Channel> channels = database.getChannels();
+        System.out.println("Total channels fetched " + channels.size());
+
         try {
-            System.out.println("Updating info channel..." + channels.toString());
             updateChannelInfo(channels);
-            System.out.println("Update info channel success");
+            System.out.println("Update info success " + channels.toString());
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("Failed to update channel info");
+            System.out.println("Failed to update info channels");
         }
 
+        CountDownLatch jobCountDown = new CountDownLatch(channels.size());
         for (Channel channel : channels) {
-            executor.execute(new QueryVideoJob(apiService, database, channel));
+            executor.execute(new QueryVideoJob(jobCountDown, apiService, database, channel));
         }
+        try {
+            jobCountDown.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Query videos job finished");
     }
 
     private void updateChannelInfo(List<Channel> channels) throws IOException {
@@ -69,7 +81,18 @@ public class QueryVideosJob {
     }
 
     public static void main(String[] args) {
-        QueryVideosJob.getInstance().run();
+        QueryVideosJob job = QueryVideosJob.getInstance();
+        while (true) {
+            try {
+                System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+                System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+                job.run();
+                // Waiting for amount of config time to start again
+                Thread.sleep(job.configs.getCrawlerTime());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                break;
+            }
+        }
     }
-
 }

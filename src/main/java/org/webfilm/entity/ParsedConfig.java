@@ -5,6 +5,9 @@ import java.util.List;
 
 public class ParsedConfig {
 
+    // 15s
+    private static final int DEFAULT_CRAWLER_TIME = 15000;
+
     private int crawlerTime;
 
     private int videosLimit;
@@ -28,7 +31,7 @@ public class ParsedConfig {
     }
 
     public int getCrawlerTime() {
-        return crawlerTime;
+        return crawlerTime == 0 ? DEFAULT_CRAWLER_TIME : crawlerTime * 1000;
     }
 
     public int getVideosLimit() {

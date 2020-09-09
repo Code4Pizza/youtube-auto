@@ -22,10 +22,14 @@ public interface WebFilmDAO {
     @RegisterConstructorMapper(Channel.class)
     List<Channel> getChannels();
 
+    @SqlUpdate("UPDATE videos SET `name`=:name, description=:description, duration=:duration, url=:url, views=:views, bg_image=:bg_image WHERE youtube_id=:youtube_id")
+    int updateVideo(@Bind("name") String name, @Bind("description") String description, @Bind("duration") int duration,
+                    @Bind("url") String url, @Bind("views") int views, @Bind("bg_image") String bgImage, @Bind("youtube_id") String youtubeId);
+
     @SqlUpdate("INSERT INTO videos(`name`, description, duration, url, views, bg_image, youtube_id) " +
             "VALUES(:name, :description, :duration, :url, :views, :bgImage, :youtubeId)")
     @GetGeneratedKeys
-    int insertVideos(@BindBean Video video);
+    int insertVideo(@BindBean Video video);
 
     @SqlUpdate("INSERT INTO video_channel_mapping(video_id, channel_id) VALUES(:video_id, :channel_id)")
     int insertVideoChannelMapping(@Bind("video_id") int videoId, @Bind("channel_id") int channelId);

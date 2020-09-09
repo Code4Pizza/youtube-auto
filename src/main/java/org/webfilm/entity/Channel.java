@@ -31,9 +31,10 @@ public class Channel {
     public Channel() {
     }
 
-    @ConstructorProperties({"id, youtube_id"})
-    public Channel(@ColumnName("id") int id, @ColumnName("youtube_id") String youtubeId) {
+    @ConstructorProperties({"id, name, youtube_id"})
+    public Channel(@ColumnName("id") int id, @ColumnName("name") String name, @ColumnName("youtube_id") String youtubeId) {
         this.id = id;
+        this.name = name;
         this.youtubeId = youtubeId;
     }
 

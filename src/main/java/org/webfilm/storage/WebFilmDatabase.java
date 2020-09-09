@@ -4,6 +4,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SharedMetricRegistries;
 import com.codahale.metrics.Timer;
 import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.webfilm.entity.Channel;
 import org.webfilm.entity.ParsedConfig;
@@ -63,10 +64,24 @@ public class WebFilmDatabase {
         }));
     }
 
-    public int insertVideos(Video video) {
+    public int insertOrUpdateVideo(Video video) {
         return database.with(jdbi -> jdbi.withHandle(handle -> {
             try (Timer.Context ignored = defaultTimer.time()) {
-                return handle.attach(WebFilmDAO.class).insertVideos(video);
+                try {
+                    return handle.attach(WebFilmDAO.class).insertVideo(video);
+                } catch (UnableToExecuteStatementException e) {
+                    // Duplicate youtube id, update instead
+                    handle.attach(WebFilmDAO.class).updateVideo(
+                            video.getName(),
+                            video.getDescription(),
+                            video.getDuration(),
+                            video.getUrl(),
+                            video.getViews(),
+                            video.getBgImage(),
+                            video.getYoutubeId()
+                    );
+                    return -1;
+                }
             }
         }));
     }
