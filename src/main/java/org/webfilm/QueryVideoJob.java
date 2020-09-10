@@ -30,24 +30,28 @@ public class QueryVideoJob implements Runnable {
     public void run() {
         try {
             // System.out.println("==============> Fetching videos from channel " + channel.getName());
-            List<Video> videos = apiService.getVideosFromChannel(channel.getYoutubeId());
+            List<Video> remoteVideos = apiService.getVideosFromChannel(channel.getYoutubeId());
+
             int countInserted = 0, countUpdated = 0;
-            for (Video video : videos) {
-                int id = database.insertOrUpdateVideo(video);
-                if (id <= 0) {
+            for (Video remoteVideo : remoteVideos) {
+                remoteVideo.setChannelId(channel.getId());
+                Video localVideo = database.isVideoExisted(channel.getId(), remoteVideo.getYoutubeId());
+                if (localVideo != null) {
+                    // Update video and mapping
+                    database.updateVideo(remoteVideo);
+                    // database.updateVideoChannelMapping(id, channel.getId());
                     countUpdated++;
-                    continue;
-                }
-                boolean success = database.insertVideoChannelMapping(id, channel.getId());
-                if (success) {
-                    System.out.println(video.toString());
+                } else {
+                    // Insert video and mapping
+                    int id = database.insertVideo(remoteVideo);
+                    database.insertVideoChannelMapping(id, channel.getId());
                     countInserted++;
                 }
             }
             String updatedTime = DateUtil.convertStringDate(System.currentTimeMillis());
             database.updateChannelUpdatedTime(updatedTime, channel.getYoutubeId());
             System.out.println("==============> Channel " + channel.getName() + "(id:" + channel.getYoutubeId() + ")" +
-                    " fetched " + videos.size() + " videos ( inserted: " + countInserted + ", updated: " + countUpdated + ")");
+                    " fetched " + remoteVideos.size() + " videos ( inserted: " + countInserted + ", updated: " + countUpdated + ")");
         } catch (IOException e) {
             System.out.println("==============> Channel " + channel.getName() + "(id:" + channel.getYoutubeId() + ")" +
                     " return error " + e.getMessage());
@@ -57,7 +61,7 @@ public class QueryVideoJob implements Runnable {
             //
         } finally {
             jobCountDown.countDown();
-            System.out.println("Countdown task " + jobCountDown.getCount());
+            // System.out.println("Countdown task " + jobCountDown.getCount());
         }
     }
 }

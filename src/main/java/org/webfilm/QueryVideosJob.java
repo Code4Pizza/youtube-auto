@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.webfilm.util.DateUtil.isChannelUpToDate;
 
@@ -60,7 +61,7 @@ public class QueryVideosJob {
         for (Channel channel : channels) {
             if (isChannelUpToDate(crawlerTime, channel.getUpdatedTime())) {
                 jobCountDown.countDown();
-                System.out.println("Countdown task " + jobCountDown.getCount());
+                // System.out.println("Countdown task " + jobCountDown.getCount());
                 System.out.println("Channel " + channel.getName() + "is up to date, ignore videos querying");
                 continue;
             }
@@ -83,12 +84,13 @@ public class QueryVideosJob {
             }
         }
         List<Channel> infos = apiService.getChannelInfos(listQueryChannelId.toString());
-        for (Channel info : infos) {
-            boolean success = database.updateChannelInfo(info);
-            if (!success) {
-                System.out.println("Failed to update info channel " + info.toString());
-            }
-        }
+        database.bulkUpdateChannelInfo(infos);
+//        for (Channel info : infos) {
+//            boolean success = database.updateChannelInfo(info);
+//            if (!success) {
+//                System.out.println("Failed to update info channel " + info.toString());
+//            }
+//        }
     }
 
     public static void main(String[] args) {
@@ -108,8 +110,8 @@ public class QueryVideosJob {
                 break;
             }
             try {
-                // Waiting for amount of config time to start again
-                Thread.sleep(job.configs.getCrawlerTime());
+                // Waiting 30 mis to repeat job
+                TimeUnit.SECONDS.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 break;

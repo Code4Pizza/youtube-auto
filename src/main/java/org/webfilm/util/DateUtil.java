@@ -25,6 +25,9 @@ public class DateUtil {
     }
 
     public static boolean isChannelUpToDate(long crawlerTime, String time) {
+        if (time == null || time.isEmpty()) {
+            return false;
+        }
         long currentTime = System.currentTimeMillis();
         long updatedTime = DateUtil.convertMillisecond(time);
         return currentTime - updatedTime < crawlerTime;
