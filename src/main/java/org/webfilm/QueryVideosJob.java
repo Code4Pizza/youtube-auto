@@ -111,7 +111,7 @@ public class QueryVideosJob {
             }
             try {
                 // Waiting 30 mis to repeat job
-                TimeUnit.SECONDS.sleep(10);
+                TimeUnit.MINUTES.sleep(1);
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 break;
