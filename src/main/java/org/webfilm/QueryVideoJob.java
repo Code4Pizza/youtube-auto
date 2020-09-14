@@ -4,11 +4,14 @@ import org.webfilm.api.ApiService;
 import org.webfilm.api.RetryException;
 import org.webfilm.api.RunOutKeyException;
 import org.webfilm.entity.Channel;
+import org.webfilm.entity.Comment;
 import org.webfilm.entity.Video;
 import org.webfilm.storage.WebFilmDatabase;
 import org.webfilm.util.DateUtil;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -52,6 +55,37 @@ public class QueryVideoJob implements Runnable {
             database.updateChannelUpdatedTime(updatedTime, channel.getYoutubeId());
             System.out.println("==============> Channel " + channel.getName() + "(id:" + channel.getYoutubeId() + ")" +
                     " fetched " + remoteVideos.size() + " videos ( inserted: " + countInserted + ", updated: " + countUpdated + ")");
+
+            if (QueryVideosJob.updateCommentsJobCountdown.get() == 0) {
+                System.out.println("Update comments is out of quote, ignored");
+                return;
+            }
+
+            System.out.println("Run job update comments of videos in channel " + channel.getName());
+            List<Video> newsLocalVideos = database.getVideos(channel.getId());
+            for (Video localVideo : newsLocalVideos) {
+                List<Comment> listNeedUpdate = new ArrayList<>();
+                List<Comment> listNeedInsert = new ArrayList<>();
+                List<Comment> remoteComments = apiService.getCommentsFromVideo(localVideo.getYoutubeId(), null, 0);
+                for (Comment remoteComment : remoteComments) {
+                    Comment comment = database.getCommentById(localVideo.getYoutubeId(), remoteComment.getCommentId());
+                    if (comment == null) {
+                        listNeedInsert.add(remoteComment);
+                    } else {
+                        listNeedUpdate.add(remoteComment);
+                    }
+                }
+                System.out.println("Comments new : " + listNeedInsert.size());
+                System.out.println("Comments update : " + listNeedUpdate.size());
+                int[] inserted = database.bulkInsertComments(localVideo.getYoutubeId(), listNeedInsert);
+                int[] updated = database.bulkUpdateComments(localVideo.getYoutubeId(), listNeedUpdate);
+                System.out.println("Comment inserted " + Arrays.toString(inserted));
+                System.out.println("Comment updated " + Arrays.toString(updated));
+            }
+            System.out.println("==============> Comments of Channel " + channel.getName() + " updated");
+            // Giảm quote update comments, mỗi 12h sẽ lại tăng lên ở UpdateCommentCountDownJob
+            QueryVideosJob.updateCommentsJobCountdown.getAndSet(0);
+
         } catch (IOException e) {
             System.out.println("==============> Channel " + channel.getName() + "(id:" + channel.getYoutubeId() + ")" +
                     " return error " + e.getMessage());

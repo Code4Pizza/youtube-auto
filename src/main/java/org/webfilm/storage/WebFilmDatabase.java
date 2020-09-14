@@ -6,6 +6,7 @@ import com.codahale.metrics.Timer;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.webfilm.entity.Channel;
+import org.webfilm.entity.Comment;
 import org.webfilm.entity.ParsedConfig;
 import org.webfilm.entity.Video;
 import org.youtube.configuration.CircuitBreakerConfiguration;
@@ -20,7 +21,7 @@ import static com.codahale.metrics.MetricRegistry.name;
 public class WebFilmDatabase {
 
     public static final String SCHEMA = "web_film";
-    public static final String HOST_PORT = "35.240.231.255:3306";
+    public static final String HOST_PORT = "35.221.250.42:3306";
     public static final String BASE_URL = String.format("jdbc:mysql://%s/%s?autoReconnect=true&useSSL=false&useUnicode=yes&characterEncoding=UTF-8", HOST_PORT, SCHEMA);
 
     public static final String USER_NAME = "film_account";
@@ -161,6 +162,81 @@ public class WebFilmDatabase {
         database.with(jdbi -> jdbi.withHandle(handle -> {
             try (Timer.Context ignored = defaultTimer.time()) {
                 return handle.attach(WebFilmDAO.class).updateChannelUpdatedTime(updatedTime, youtubeId);
+            }
+        }));
+    }
+
+    public int[] bulkInsertComments(String videoId, List<Comment> comments) {
+        List<String> commentIds = new ArrayList<>();
+        List<String> textDisplays = new ArrayList<>();
+        List<String> textOriginals = new ArrayList<>();
+        List<String> authorDisplayNames = new ArrayList<>();
+        List<String> authorProfileImages = new ArrayList<>();
+        List<String> authorChannelIds = new ArrayList<>();
+        List<Integer> likeCounts = new ArrayList<>();
+        List<String> publishedAts = new ArrayList<>();
+        List<String> updatedAt = new ArrayList<>();
+
+        for (Comment comment : comments) {
+            commentIds.add(comment.getCommentId());
+            textDisplays.add(comment.getTextDisplay());
+            textOriginals.add(comment.getTextOriginal());
+            authorDisplayNames.add(comment.getAuthorDisplayName());
+            authorProfileImages.add(comment.getAuthorProfileImage());
+            authorChannelIds.add(comment.getAuthorChannelId());
+            likeCounts.add(comment.getLikeCount());
+            publishedAts.add(comment.getPublishedAt());
+            updatedAt.add(comment.getUpdatedAt());
+        }
+
+        return database.with(jdbi -> jdbi.withHandle(handle -> {
+            try (Timer.Context ignored = defaultTimer.time()) {
+                return handle.attach(WebFilmDAO.class).bulkInsertComments(videoId, commentIds, textDisplays,
+                        textOriginals, authorDisplayNames, authorProfileImages, authorChannelIds, likeCounts, publishedAts, updatedAt);
+            }
+        }));
+    }
+
+    public int[] bulkUpdateComments(String videoId, List<Comment> comments) {
+        List<String> commentIds = new ArrayList<>();
+        List<String> textDisplays = new ArrayList<>();
+        List<String> textOriginals = new ArrayList<>();
+        List<String> authorDisplayNames = new ArrayList<>();
+        List<String> authorProfileImages = new ArrayList<>();
+        List<Integer> likeCounts = new ArrayList<>();
+        List<String> publishedAts = new ArrayList<>();
+
+        for (Comment comment : comments) {
+            commentIds.add(comment.getCommentId());
+            textDisplays.add(comment.getTextDisplay());
+            textOriginals.add(comment.getTextOriginal());
+            authorDisplayNames.add(comment.getAuthorDisplayName());
+            authorProfileImages.add(comment.getAuthorProfileImage());
+            likeCounts.add(comment.getLikeCount());
+            publishedAts.add(comment.getPublishedAt());
+        }
+
+        return database.with(jdbi -> jdbi.withHandle(handle -> {
+            try (Timer.Context ignored = defaultTimer.time()) {
+                return handle.attach(WebFilmDAO.class).bulkUpdateComments(textDisplays,
+                        textOriginals, authorDisplayNames, authorProfileImages, likeCounts, publishedAts, commentIds);
+            }
+        }));
+    }
+
+    public void deleteComments(String videoId) {
+        database.with(jdbi -> jdbi.withHandle(handle -> {
+            try (Timer.Context ignored = defaultTimer.time()) {
+                handle.attach(WebFilmDAO.class).deleteAllComments(videoId);
+                return null;
+            }
+        }));
+    }
+
+    public Comment getCommentById(String videoId, String commentId) {
+        return database.with(jdbi -> jdbi.withHandle(handle -> {
+            try (Timer.Context ignored = defaultTimer.time()) {
+                return handle.attach(WebFilmDAO.class).getCommentById(videoId, commentId);
             }
         }));
     }

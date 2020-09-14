@@ -13,6 +13,8 @@ public class ParsedConfig {
 
     private int videosLimit;
 
+    private int commentsLimit;
+
     private String[] youtubeApiKey;
 
     public ParsedConfig(@Nonnull List<Config> configs) {
@@ -23,6 +25,9 @@ public class ParsedConfig {
                     break;
                 case "videos_limit":
                     videosLimit = Integer.parseInt(config.getConfigValue());
+                    break;
+                case "comments_limit":
+                    commentsLimit = Integer.parseInt(config.getConfigValue());
                     break;
                 case "youtube_api_key":
                     if (config.getConfigValue().split(",").length > 0) {
@@ -45,6 +50,10 @@ public class ParsedConfig {
         return videosLimit;
     }
 
+    public int getCommentsLimit() {
+        return commentsLimit;
+    }
+
     public String[] getYoutubeApiKey() {
         return youtubeApiKey;
     }
@@ -54,7 +63,8 @@ public class ParsedConfig {
         return "ParsedConfig{" +
                 "crawlerTime=" + crawlerTime +
                 ", videosLimit=" + videosLimit +
-                ", youtubeApiKey='" + Arrays.toString(youtubeApiKey) + '\'' +
+                ", commentsLimit=" + commentsLimit +
+                ", youtubeApiKey=" + Arrays.toString(youtubeApiKey) +
                 '}';
     }
 }

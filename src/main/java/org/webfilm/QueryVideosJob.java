@@ -13,10 +13,13 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.webfilm.util.DateUtil.isChannelUpToDate;
 
 public class QueryVideosJob {
+
+    public static final AtomicInteger updateCommentsJobCountdown = new AtomicInteger(1);
 
     public static QueryVideosJob INSTANCE;
 
@@ -89,6 +92,7 @@ public class QueryVideosJob {
 
     public static void main(String[] args) {
         QueryVideosJob job = QueryVideosJob.getInstance();
+        new Thread(new UpdateCommentCountDownJob()).start();
         while (true) {
             System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
             System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
@@ -100,20 +104,28 @@ public class QueryVideosJob {
                 continue;
             } catch (RunOutKeyException e) {
                 e.printStackTrace();
-                try {
-                    // Waiting 1 day to reset quota
-                    TimeUnit.DAYS.sleep(1);
-                } catch (InterruptedException ignored) {
-
-                }
             }
             try {
                 // Waiting 30 mis to repeat job
-                TimeUnit.MINUTES.sleep(1);
+                TimeUnit.MINUTES.sleep(30);
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 break;
             }
+        }
+    }
+
+    private static class UpdateCommentCountDownJob implements Runnable {
+
+        @Override
+        public void run() {
+            try {
+                TimeUnit.HOURS.sleep(12);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("Increase quote update comments");
+            updateCommentsJobCountdown.incrementAndGet();
         }
     }
 }

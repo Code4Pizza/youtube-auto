@@ -4,11 +4,12 @@ import com.google.gson.*;
 import org.joda.time.Period;
 import org.joda.time.format.ISOPeriodFormat;
 import org.webfilm.entity.Channel;
+import org.webfilm.entity.Comment;
 import org.webfilm.entity.ParsedConfig;
 import org.webfilm.entity.Video;
-import org.webfilm.util.DateUtil;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -28,6 +29,7 @@ public class ApiService {
     public static final String PATH_LIST_VIDEO = "/search";
     public static final String PATH_VIDEO_DETAILS = "/videos";
     public static final String PATH_CHANNEL_INFO = "/channels";
+    public static final String PATH_COMMENTS = "/commentThreads";
 
     private final ParsedConfig parsedConfig;
     private final Gson gson;
@@ -39,8 +41,10 @@ public class ApiService {
         GsonBuilder gsonBuilder = new GsonBuilder();
         JsonDeserializer<Video> videoJsonDeserializer = ApiService::deserializeVideo;
         JsonDeserializer<Channel> channelJsonDeserializer = ApiService::deserializeChannel;
+        JsonDeserializer<Comment> commentJsonDeserializer = ApiService::deserializeComment;
         gsonBuilder.registerTypeAdapter(Video.class, videoJsonDeserializer);
         gsonBuilder.registerTypeAdapter(Channel.class, channelJsonDeserializer);
+        gsonBuilder.registerTypeAdapter(Comment.class, commentJsonDeserializer);
         this.gson = gsonBuilder.create();
     }
 
@@ -135,6 +139,42 @@ public class ApiService {
         }
 
         return new Channel(name, youtubeUrl, youtubeId, description, avatar, subscribers);
+    }
+
+    public static Comment deserializeComment(JsonElement json, Type type, JsonDeserializationContext context) {
+        JsonObject itemObject = json.getAsJsonObject();
+
+        String videoId = "";
+        String commentId = "";
+        String textDisplay = "";
+        String textOriginal = "";
+        String authorDisplayName = "";
+        String authorProfileImage = "";
+        String authorChannelId = "";
+        int likeCount = 0;
+        String publishedAt = "";
+        String updatedAt = "";
+
+        try {
+            JsonObject snippetObject = itemObject.getAsJsonObject("snippet");
+            videoId = snippetObject.get("videoId").getAsString();
+            JsonObject topLevelComment = snippetObject.getAsJsonObject("topLevelComment");
+            commentId = topLevelComment.get("id").getAsString();
+            JsonObject snippet = topLevelComment.getAsJsonObject("snippet");
+            textDisplay = snippet.get("textDisplay").getAsString();
+            textOriginal = snippet.get("textOriginal").getAsString();
+            authorDisplayName = snippet.get("authorDisplayName").getAsString();
+            authorProfileImage = snippet.get("authorProfileImageUrl").getAsString();
+            authorChannelId = snippet.get("authorChannelId").getAsJsonObject().get("value").getAsString();
+            likeCount = snippet.get("likeCount").getAsInt();
+            publishedAt = snippet.get("publishedAt").getAsString();
+            updatedAt = snippet.get("updatedAt").getAsString();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Failed to parse comment");
+        }
+
+        return new Comment(videoId, commentId, textDisplay, textOriginal, authorDisplayName, authorProfileImage, authorChannelId, likeCount, publishedAt, updatedAt);
     }
 
     public String makeServiceRequest(String path, @Nonnull Map<String, String> headers) throws IOException, RetryException, RunOutKeyException {
@@ -260,5 +300,41 @@ public class ApiService {
             videos.add(video);
         }
         return videos;
+    }
+
+    public List<Comment> getCommentsFromVideo(String videoId, @Nullable String nextPageToken, int count) throws RetryException, RunOutKeyException, IOException {
+        Map<String, String> query = new HashMap<>();
+        String response;
+        JsonObject responseJson;
+        JsonArray items;
+
+        query.put("videoId", videoId);
+        query.put("part", "snippet");
+        query.put("maxResults", String.valueOf(parsedConfig.getCommentsLimit()));
+        query.put("order", "relevance");
+
+        if (nextPageToken != null) {
+            query.put("nextPageToken", nextPageToken);
+        }
+
+        response = makeServiceRequest(PATH_COMMENTS, query);
+        responseJson = gson.fromJson(response, JsonObject.class);
+        if (!responseJson.has("items")) {
+            throw new IOException(responseJson.toString());
+        }
+        List<Comment> comments = new ArrayList<>();
+        items = responseJson.getAsJsonArray("items");
+        for (JsonElement item : items) {
+            Comment comment = gson.fromJson(item, Comment.class);
+            comments.add(comment);
+        }
+        if (!responseJson.has("nextPageToken")) {
+            return comments;
+        }
+        nextPageToken = responseJson.get("nextPageToken").getAsString();
+        if (count > 0) {
+            comments.addAll(getCommentsFromVideo(videoId, nextPageToken, --count));
+        }
+        return comments;
     }
 }
