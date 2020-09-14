@@ -85,12 +85,6 @@ public class QueryVideosJob {
         }
         List<Channel> infos = apiService.getChannelInfos(listQueryChannelId.toString());
         database.bulkUpdateChannelInfo(infos);
-//        for (Channel info : infos) {
-//            boolean success = database.updateChannelInfo(info);
-//            if (!success) {
-//                System.out.println("Failed to update info channel " + info.toString());
-//            }
-//        }
     }
 
     public static void main(String[] args) {
@@ -106,8 +100,12 @@ public class QueryVideosJob {
                 continue;
             } catch (RunOutKeyException e) {
                 e.printStackTrace();
-                // TODO sleep 1 day
-                break;
+                try {
+                    // Waiting 1 day to reset quota
+                    TimeUnit.DAYS.sleep(1);
+                } catch (InterruptedException ignored) {
+
+                }
             }
             try {
                 // Waiting 30 mis to repeat job
