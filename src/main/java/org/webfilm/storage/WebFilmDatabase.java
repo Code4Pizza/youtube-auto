@@ -197,7 +197,7 @@ public class WebFilmDatabase {
         }));
     }
 
-    public int[] bulkUpdateComments(String videoId, List<Comment> comments) {
+    public int[] bulkUpdateComments(List<Comment> comments) {
         List<String> commentIds = new ArrayList<>();
         List<String> textDisplays = new ArrayList<>();
         List<String> textOriginals = new ArrayList<>();

@@ -49,6 +49,8 @@ public class QueryVideosJob {
         System.out.println("Start query videos job");
 
         List<Channel> channels = database.getChannels();
+        // sub lại ít channel test cho dễ
+        // channels = channels.subList(channels.size() - 1, channels.size());
         System.out.println("Total channels fetched " + channels.size());
 
         try {
@@ -68,7 +70,7 @@ public class QueryVideosJob {
                 System.out.println("Channel " + channel.getName() + "is up to date, ignore videos querying");
                 continue;
             }
-            executor.execute(new QueryVideoJob(jobCountDown, apiService, database, channel));
+            executor.execute(new QueryVideoJob(jobCountDown, apiService, database, channel, configs));
         }
         try {
             jobCountDown.await();
@@ -95,7 +97,7 @@ public class QueryVideosJob {
         new Thread(new UpdateCommentCountDownJob()).start();
         while (true) {
             System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-            System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+            long startTime = System.currentTimeMillis();
             try {
                 job.run();
             } catch (RetryException e) {
@@ -105,6 +107,9 @@ public class QueryVideosJob {
             } catch (RunOutKeyException e) {
                 e.printStackTrace();
             }
+            long endTime = TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis() - startTime);
+            System.out.println("Job done in " + endTime + " mins");
+            System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
             try {
                 // Waiting 30 mis to repeat job
                 TimeUnit.MINUTES.sleep(30);

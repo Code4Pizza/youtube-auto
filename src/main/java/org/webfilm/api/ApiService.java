@@ -17,10 +17,7 @@ import java.io.Reader;
 import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ApiService {
@@ -302,7 +299,7 @@ public class ApiService {
         return videos;
     }
 
-    public List<Comment> getCommentsFromVideo(String videoId, @Nullable String nextPageToken, int count) throws RetryException, RunOutKeyException, IOException {
+    public Set<Comment> getCommentsFromVideo(String videoId, @Nullable String nextPageToken, int count) throws RetryException, RunOutKeyException, IOException {
         Map<String, String> query = new HashMap<>();
         String response;
         JsonObject responseJson;
@@ -314,7 +311,7 @@ public class ApiService {
         query.put("order", "relevance");
 
         if (nextPageToken != null) {
-            query.put("nextPageToken", nextPageToken);
+            query.put("pageToken", nextPageToken);
         }
 
         response = makeServiceRequest(PATH_COMMENTS, query);
@@ -322,17 +319,21 @@ public class ApiService {
         if (!responseJson.has("items")) {
             throw new IOException(responseJson.toString());
         }
-        List<Comment> comments = new ArrayList<>();
+        Set<Comment> comments = new HashSet<>();
         items = responseJson.getAsJsonArray("items");
         for (JsonElement item : items) {
             Comment comment = gson.fromJson(item, Comment.class);
             comments.add(comment);
         }
         if (!responseJson.has("nextPageToken")) {
+            if (count > 0) {
+                System.out.println("Query all out of comments");
+            }
             return comments;
         }
         nextPageToken = responseJson.get("nextPageToken").getAsString();
         if (count > 0) {
+            System.out.println("Query next page " + count);
             comments.addAll(getCommentsFromVideo(videoId, nextPageToken, --count));
         }
         return comments;

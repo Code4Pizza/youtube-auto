@@ -4,35 +4,39 @@ import org.webfilm.api.ApiService;
 import org.webfilm.api.RetryException;
 import org.webfilm.api.RunOutKeyException;
 import org.webfilm.entity.Channel;
-import org.webfilm.entity.Comment;
+import org.webfilm.entity.ParsedConfig;
 import org.webfilm.entity.Video;
 import org.webfilm.storage.WebFilmDatabase;
 import org.webfilm.util.DateUtil;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class QueryVideoJob implements Runnable {
+
+    private final ExecutorService executor = Executors.newFixedThreadPool(5);
 
     private final CountDownLatch jobCountDown;
     private final ApiService apiService;
     private final WebFilmDatabase database;
     private final Channel channel;
+    private final ParsedConfig configs;
 
-    public QueryVideoJob(CountDownLatch jobCountDown, ApiService apiService, WebFilmDatabase database, Channel channel) {
+    public QueryVideoJob(CountDownLatch jobCountDown, ApiService apiService, WebFilmDatabase database, Channel channel, ParsedConfig configs) {
         this.jobCountDown = jobCountDown;
         this.apiService = apiService;
         this.database = database;
         this.channel = channel;
+        this.configs = configs;
     }
 
     @Override
     public void run() {
         try {
-            // System.out.println("==============> Fetching videos from channel " + channel.getName());
+            System.out.println("==============> Fetching videos from channel " + channel.getName());
             List<Video> remoteVideos = apiService.getVideosFromChannel(channel.getYoutubeId());
 
             int countInserted = 0, countUpdated = 0;
@@ -57,32 +61,22 @@ public class QueryVideoJob implements Runnable {
                     " fetched " + remoteVideos.size() + " videos ( inserted: " + countInserted + ", updated: " + countUpdated + ")");
 
             if (QueryVideosJob.updateCommentsJobCountdown.get() == 0) {
-                System.out.println("Update comments is out of quote, ignored");
+                System.out.println("Update comments is out of quote, passed");
                 return;
             }
 
             System.out.println("Run job update comments of videos in channel " + channel.getName());
             List<Video> newsLocalVideos = database.getVideos(channel.getId());
+            CountDownLatch commentsJobCountdown = new CountDownLatch(newsLocalVideos.size());
             for (Video localVideo : newsLocalVideos) {
-                List<Comment> listNeedUpdate = new ArrayList<>();
-                List<Comment> listNeedInsert = new ArrayList<>();
-                List<Comment> remoteComments = apiService.getCommentsFromVideo(localVideo.getYoutubeId(), null, 0);
-                for (Comment remoteComment : remoteComments) {
-                    Comment comment = database.getCommentById(localVideo.getYoutubeId(), remoteComment.getCommentId());
-                    if (comment == null) {
-                        listNeedInsert.add(remoteComment);
-                    } else {
-                        listNeedUpdate.add(remoteComment);
-                    }
-                }
-                System.out.println("Comments new : " + listNeedInsert.size());
-                System.out.println("Comments update : " + listNeedUpdate.size());
-                int[] inserted = database.bulkInsertComments(localVideo.getYoutubeId(), listNeedInsert);
-                int[] updated = database.bulkUpdateComments(localVideo.getYoutubeId(), listNeedUpdate);
-                System.out.println("Comment inserted " + Arrays.toString(inserted));
-                System.out.println("Comment updated " + Arrays.toString(updated));
+                executor.execute(new QueryCommentsJob(commentsJobCountdown, apiService, database, localVideo, configs));
             }
-            System.out.println("==============> Comments of Channel " + channel.getName() + " updated");
+            try {
+                commentsJobCountdown.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("==============> Query comments of channel " + channel.getName() + " finished");
             // Giảm quote update comments, mỗi 12h sẽ lại tăng lên ở UpdateCommentCountDownJob
             QueryVideosJob.updateCommentsJobCountdown.getAndSet(0);
 

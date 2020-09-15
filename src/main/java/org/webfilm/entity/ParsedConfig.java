@@ -15,6 +15,8 @@ public class ParsedConfig {
 
     private int commentsLimit;
 
+    private int commentsPerUpdate;
+
     private String[] youtubeApiKey;
 
     public ParsedConfig(@Nonnull List<Config> configs) {
@@ -28,6 +30,9 @@ public class ParsedConfig {
                     break;
                 case "comments_limit":
                     commentsLimit = Integer.parseInt(config.getConfigValue());
+                    break;
+                case "comments_per_update":
+                    commentsPerUpdate = Integer.parseInt(config.getConfigValue());
                     break;
                 case "youtube_api_key":
                     if (config.getConfigValue().split(",").length > 0) {
@@ -56,6 +61,10 @@ public class ParsedConfig {
 
     public String[] getYoutubeApiKey() {
         return youtubeApiKey;
+    }
+
+    public int getPageCountQuery() {
+        return commentsPerUpdate / commentsLimit;
     }
 
     @Override
