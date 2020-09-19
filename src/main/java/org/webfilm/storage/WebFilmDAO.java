@@ -9,6 +9,7 @@ import org.webfilm.entity.Comment;
 import org.webfilm.entity.Config;
 import org.webfilm.entity.Video;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 public interface WebFilmDAO {
@@ -33,14 +34,15 @@ public interface WebFilmDAO {
     @RegisterConstructorMapper(Comment.class)
     Comment getCommentById(@Bind("video_id") String videoId, @Bind("comment_id") String commentId);
 
-    @SqlUpdate("UPDATE videos SET `name`=:name, description=:description, duration=:duration, url=:url, views=:views, bg_image=:bg_image, channel_id=:channel_id " +
+    @SqlUpdate("UPDATE videos SET `name`=:name, description=:description, publish_time=:publishTime, duration=:duration, url=:url, views=:views, bg_image=:bg_image, channel_id=:channel_id " +
             "WHERE youtube_id=:youtube_id")
     int updateVideo(@Bind("name") String name, @Bind("description") String description, @Bind("duration") int duration,
+                    @Bind("publishTime") Timestamp publishTime,
                     @Bind("url") String url, @Bind("views") int views, @Bind("bg_image") String bgImage,
                     @Bind("youtube_id") String youtubeId, @Bind("channel_id") int channelId);
 
-    @SqlUpdate("INSERT INTO videos(`name`, description, duration, url, views, bg_image, youtube_id, channel_id) " +
-            "VALUES(:name, :description, :duration, :url, :views, :bgImage, :youtubeId, :channelId)")
+    @SqlUpdate("INSERT INTO videos(`name`, description, publish_time, duration, url, views, bg_image, youtube_id, channel_id) " +
+            "VALUES(:name, :description, :publishTime, :duration, :url, :views, :bgImage, :youtubeId, :channelId)")
     @GetGeneratedKeys
     int insertVideo(@BindBean Video video);
 
@@ -83,19 +85,19 @@ public interface WebFilmDAO {
     @SqlUpdate("DELETE FROM comments WHERE youtube_id=:video_id")
     void deleteAllComments(@Bind("video_id") String videoId);
 
-    @SqlUpdate("DELETE FROM videos WHERE video_id=(select id from videos where youtube_id=:video_id)")
+    @SqlUpdate("DELETE FROM videos WHERE youtube_id=:video_id")
     void deleteVideoById(@Bind("video_id") String videoId);
 
-    @SqlUpdate("delete from video_cat_mapping where  video_id=(select id from videos where youtube_id=:video_id)")
+    @SqlUpdate("delete from video_cat_mapping where  video_id in (select id from videos where youtube_id=:video_id)")
     void deleteVideoCatMapping(@Bind("video_id") String videoId);
 
-    @SqlUpdate("delete from video_channel_mapping where video_id=(select id from videos where youtube_id=:video_id)")
+    @SqlUpdate("delete from video_channel_mapping where video_id in (select id from videos where youtube_id=:video_id)")
     void deleteVideoChannelMapping(@Bind("video_id") String videoId);
 
-    @SqlUpdate("delete from video_film_mapping where video_id=(select id from videos where youtube_id=:video_id)")
+    @SqlUpdate("delete from video_film_mapping where video_id in (select id from videos where youtube_id=:video_id)")
     void deleteVideoFilmMapping(@Bind("video_id") String videoId);
 
-    @SqlUpdate("delete from video_menu_mapping where video_id=(select id from videos where youtube_id=:video_id)")
+    @SqlUpdate("delete from video_menu_mapping where video_id in (select id from videos where youtube_id=:video_id)")
     void deleteVideoMenuMapping(@Bind("video_id") String videoId);
 
 }

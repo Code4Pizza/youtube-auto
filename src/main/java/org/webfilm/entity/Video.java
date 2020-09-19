@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jdbi.v3.core.mapper.reflect.ColumnName;
 
 import java.beans.ConstructorProperties;
+import java.sql.Timestamp;
 import java.util.Objects;
 
 public class Video {
@@ -13,6 +14,9 @@ public class Video {
 
     @JsonProperty
     private String name;
+
+    @JsonProperty
+    private Timestamp publishTime;
 
     @JsonProperty
     private String description;
@@ -38,7 +42,9 @@ public class Video {
     public Video() {
     }
 
-    public Video(String name, String description, int duration, String bgImage, String url, int views, String youtubeId) {
+    public Video(String name, String description,
+                 Timestamp publishTime,
+                 int duration, String bgImage, String url, int views, String youtubeId) {
         this.name = name;
         this.description = description;
         this.duration = duration;
@@ -46,6 +52,7 @@ public class Video {
         this.url = url;
         this.views = views;
         this.youtubeId = youtubeId;
+        this.publishTime = publishTime;
     }
 
     @ConstructorProperties({"id, name, description, duration, bg_image, url, views, youtube_id, channel_id"})
@@ -56,6 +63,7 @@ public class Video {
                  @ColumnName(("bg_image")) String bgImage,
                  @ColumnName(("url")) String url,
                  @ColumnName(("views")) int views,
+                 @ColumnName(("publish_time")) Timestamp publishTime,
                  @ColumnName(("youtube_id")) String youtubeId,
                  @ColumnName(("channel_id")) int channelId) {
         this.id = id;
@@ -67,6 +75,7 @@ public class Video {
         this.views = views;
         this.youtubeId = youtubeId;
         this.channelId = channelId;
+        this.publishTime = publishTime;
     }
 
     public int getId() {
@@ -110,6 +119,10 @@ public class Video {
 
     public void setChannelId(int channelId) {
         this.channelId = channelId;
+    }
+
+    public Timestamp getPublishTime() {
+        return publishTime;
     }
 
     @Override

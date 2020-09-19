@@ -50,7 +50,7 @@ public class QueryVideosJob {
 
         List<Channel> channels = database.getChannels();
         // sub lại ít channel test cho dễ
-        // channels = channels.subList(channels.size() - 1, channels.size());
+//         channels = channels.subList(channels.size() - 1, channels.size());
         System.out.println("Total channels fetched " + channels.size());
 
         try {

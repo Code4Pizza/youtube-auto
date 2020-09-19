@@ -65,7 +65,8 @@ public class QueryVideoJob implements Runnable {
 
             }
             currentVideos.forEach(video -> {
-                if (!checkMapper.get(video.getYoutubeId())) {
+                if (checkMapper.get(video.getYoutubeId()) == null) {
+                    database.deleteVideoMappingById(video.getYoutubeId());
                     database.deleteVideoById(video.getYoutubeId());
                     countDeleted.getAndIncrement();
                 }

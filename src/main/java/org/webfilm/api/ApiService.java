@@ -17,6 +17,8 @@ import java.io.Reader;
 import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -52,14 +54,21 @@ public class ApiService {
         String url = String.format("https://www.youtube.com/embed/%s", youtubeId);
 
         String name = "";
+        String publishedAt = "";
         String description = "";
         int duration = 0;
         String bgImage = "";
         int views = 0;
+        Timestamp publishedTime = null;
 
         try {
             JsonObject snippetObject = itemObject.getAsJsonObject("snippet");
             name = snippetObject.get("title").getAsString();
+            publishedAt = snippetObject.get("publishedAt").getAsString();
+            // format to timestamp
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+            publishedTime = new Timestamp(format.parse(publishedAt).getTime());
+
             description = snippetObject.get("description").getAsString();
             JsonObject thumbnailObject = snippetObject.getAsJsonObject("thumbnails");
             if (thumbnailObject.has("maxres")) {
@@ -95,7 +104,7 @@ public class ApiService {
             System.out.println("Failed to fetch statistics of " + youtubeId);
         }
 
-        return new Video(name, description, duration, bgImage, url, views, youtubeId);
+        return new Video(name, description, publishedTime, duration, bgImage, url, views, youtubeId);
     }
 
     private static Channel deserializeChannel(JsonElement json, Type type, JsonDeserializationContext context) {

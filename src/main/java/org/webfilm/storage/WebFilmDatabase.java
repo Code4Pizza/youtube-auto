@@ -96,6 +96,7 @@ public class WebFilmDatabase {
                         video.getName(),
                         video.getDescription(),
                         video.getDuration(),
+                        video.getPublishTime(),
                         video.getUrl(),
                         video.getViews(),
                         video.getBgImage(),
@@ -237,6 +238,14 @@ public class WebFilmDatabase {
         database.with(jdbi -> jdbi.withHandle(handle -> {
             try (Timer.Context ignored = defaultTimer.time()) {
                 handle.attach(WebFilmDAO.class).deleteVideoById(videoId);
+                return null;
+            }
+        }));
+    }
+
+    public void deleteVideoMappingById(String videoId) {
+        database.with(jdbi -> jdbi.withHandle(handle -> {
+            try (Timer.Context ignored = defaultTimer.time()) {
                 handle.attach(WebFilmDAO.class).deleteVideoCatMapping(videoId);
                 handle.attach(WebFilmDAO.class).deleteVideoChannelMapping(videoId);
                 handle.attach(WebFilmDAO.class).deleteVideoFilmMapping(videoId);
