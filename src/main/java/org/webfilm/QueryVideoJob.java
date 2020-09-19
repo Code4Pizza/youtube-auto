@@ -10,10 +10,13 @@ import org.webfilm.storage.WebFilmDatabase;
 import org.webfilm.util.DateUtil;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class QueryVideoJob implements Runnable {
 
@@ -38,9 +41,14 @@ public class QueryVideoJob implements Runnable {
         try {
             System.out.println("==============> Fetching videos from channel " + channel.getName());
             List<Video> remoteVideos = apiService.getVideosFromChannel(channel.getYoutubeId());
+            List<Video> currentVideos = database.getVideos(channel.getId());
+            Map<String, Boolean> checkMapper = new HashMap<>();
 
-            int countInserted = 0, countUpdated = 0;
+            int countInserted = 0;
+            int countUpdated = 0;
+            AtomicInteger countDeleted = new AtomicInteger();
             for (Video remoteVideo : remoteVideos) {
+                checkMapper.put(remoteVideo.getYoutubeId(), true);
                 remoteVideo.setChannelId(channel.getId());
                 Video localVideo = database.isVideoExisted(channel.getId(), remoteVideo.getYoutubeId());
                 if (localVideo != null) {
@@ -54,11 +62,19 @@ public class QueryVideoJob implements Runnable {
                     database.insertVideoChannelMapping(id, channel.getId());
                     countInserted++;
                 }
+
             }
+            currentVideos.forEach(video -> {
+                if (!checkMapper.get(video.getYoutubeId())) {
+                    database.deleteVideoById(video.getYoutubeId());
+                    countDeleted.getAndIncrement();
+                }
+            });
             String updatedTime = DateUtil.convertStringDate(System.currentTimeMillis());
             database.updateChannelUpdatedTime(updatedTime, channel.getYoutubeId());
             System.out.println("==============> Channel " + channel.getName() + "(id:" + channel.getYoutubeId() + ")" +
-                    " fetched " + remoteVideos.size() + " videos ( inserted: " + countInserted + ", updated: " + countUpdated + ")");
+                    " fetched " + remoteVideos.size() + " videos ( inserted: " + countInserted
+                    + ", updated: " + countUpdated + ", deleted: " + countDeleted.get() + ")");
 
             if (QueryVideosJob.updateCommentsJobCountdown.get() == 0) {
                 System.out.println("Update comments is out of quote, passed");

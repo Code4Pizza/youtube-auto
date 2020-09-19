@@ -80,7 +80,22 @@ public interface WebFilmDAO {
                              @Bind("author_display_name") List<String> authorDisplayNames, @Bind("author_profile_image") List<String> authorProfileImages,
                              @Bind("like_count") List<Integer> likeCounts, @Bind("updated_at") List<String> updatedAts, @Bind("comment_id") List<String> commentIds);
 
-    @SqlUpdate("DELETE FROM comments WHERE video_id=:video_id")
+    @SqlUpdate("DELETE FROM comments WHERE youtube_id=:video_id")
     void deleteAllComments(@Bind("video_id") String videoId);
+
+    @SqlUpdate("DELETE FROM videos WHERE video_id=(select id from videos where youtube_id=:video_id)")
+    void deleteVideoById(@Bind("video_id") String videoId);
+
+    @SqlUpdate("delete from video_cat_mapping where  video_id=(select id from videos where youtube_id=:video_id)")
+    void deleteVideoCatMapping(@Bind("video_id") String videoId);
+
+    @SqlUpdate("delete from video_channel_mapping where video_id=(select id from videos where youtube_id=:video_id)")
+    void deleteVideoChannelMapping(@Bind("video_id") String videoId);
+
+    @SqlUpdate("delete from video_film_mapping where video_id=(select id from videos where youtube_id=:video_id)")
+    void deleteVideoFilmMapping(@Bind("video_id") String videoId);
+
+    @SqlUpdate("delete from video_menu_mapping where video_id=(select id from videos where youtube_id=:video_id)")
+    void deleteVideoMenuMapping(@Bind("video_id") String videoId);
 
 }

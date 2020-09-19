@@ -233,6 +233,19 @@ public class WebFilmDatabase {
         }));
     }
 
+    public void deleteVideoById(String videoId) {
+        database.with(jdbi -> jdbi.withHandle(handle -> {
+            try (Timer.Context ignored = defaultTimer.time()) {
+                handle.attach(WebFilmDAO.class).deleteVideoById(videoId);
+                handle.attach(WebFilmDAO.class).deleteVideoCatMapping(videoId);
+                handle.attach(WebFilmDAO.class).deleteVideoChannelMapping(videoId);
+                handle.attach(WebFilmDAO.class).deleteVideoFilmMapping(videoId);
+                handle.attach(WebFilmDAO.class).deleteVideoMenuMapping(videoId);
+                return null;
+            }
+        }));
+    }
+
     public Comment getCommentById(String videoId, String commentId) {
         return database.with(jdbi -> jdbi.withHandle(handle -> {
             try (Timer.Context ignored = defaultTimer.time()) {
