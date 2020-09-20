@@ -69,7 +69,7 @@ public class ApiService {
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
             publishedTime = new Timestamp(format.parse(publishedAt).getTime());
 
-            description = snippetObject.get("description").getAsString();
+            description = snippetObject.get("description").getAsString().replaceAll("\n+", "\n");
             JsonObject thumbnailObject = snippetObject.getAsJsonObject("thumbnails");
             if (thumbnailObject.has("maxres")) {
                 bgImage = thumbnailObject.getAsJsonObject("maxres").get("url").getAsString();
@@ -120,7 +120,7 @@ public class ApiService {
         try {
             JsonObject snippetObject = itemObject.getAsJsonObject("snippet");
             name = snippetObject.get("title").getAsString();
-            description = snippetObject.get("description").getAsString();
+            description = snippetObject.get("description").getAsString().replaceAll("\n+", "\n");
             JsonObject thumbnailObject = snippetObject.getAsJsonObject("thumbnails");
             if (thumbnailObject.has("maxres")) {
                 avatar = thumbnailObject.getAsJsonObject("maxres").get("url").getAsString();
