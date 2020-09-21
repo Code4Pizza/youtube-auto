@@ -40,7 +40,12 @@ public class QueryVideoJob implements Runnable {
     public void run() {
         try {
             System.out.println("==============> Fetching videos from channel " + channel.getName());
-            List<Video> remoteVideos = apiService.getVideosFromChannel(channel.getYoutubeId());
+//            List<Video> remoteVideos = apiService.getVideosFromChannel(channel.getYoutubeId());
+//            if (remoteVideos.size() == 0){
+//                remoteVideos = apiService.getVideoFromChannelPlaylist(channel.getYoutubeId());
+//            }
+
+            List<Video> remoteVideos = apiService.getVideoFromChannelPlaylist(channel.getYoutubeId());
             List<Video> currentVideos = database.getVideos(channel.getId());
             Map<String, Boolean> checkMapper = new HashMap<>();
 

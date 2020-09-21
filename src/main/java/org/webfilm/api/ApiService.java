@@ -27,6 +27,7 @@ public class ApiService {
     public static final String BASE_URL = "https://www.googleapis.com/youtube/v3";
     public static final String PATH_LIST_VIDEO = "/search";
     public static final String PATH_VIDEO_DETAILS = "/videos";
+    public static final String PATH_PLAYLIST_ITEMS = "/playlistItems";
     public static final String PATH_CHANNEL_INFO = "/channels";
     public static final String PATH_COMMENTS = "/commentThreads";
 
@@ -48,6 +49,66 @@ public class ApiService {
     }
 
     private static Video deserializeVideo(JsonElement json, Type type, JsonDeserializationContext context) {
+        JsonObject itemObject = json.getAsJsonObject();
+
+        String youtubeId = itemObject.get("id").getAsString();
+        String url = String.format("https://www.youtube.com/embed/%s", youtubeId);
+
+        String name = "";
+        String publishedAt = "";
+        String description = "";
+        int duration = 0;
+        String bgImage = "";
+        int views = 0;
+        Timestamp publishedTime = null;
+
+        try {
+            JsonObject snippetObject = itemObject.getAsJsonObject("snippet");
+            name = snippetObject.get("title").getAsString();
+            publishedAt = snippetObject.get("publishedAt").getAsString();
+            // format to timestamp
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+            publishedTime = new Timestamp(format.parse(publishedAt).getTime());
+
+            description = snippetObject.get("description").getAsString().replaceAll("\n+", "\n");
+            JsonObject thumbnailObject = snippetObject.getAsJsonObject("thumbnails");
+            if (thumbnailObject.has("maxres")) {
+                bgImage = thumbnailObject.getAsJsonObject("maxres").get("url").getAsString();
+            } else if (thumbnailObject.has("high")) {
+                bgImage = thumbnailObject.getAsJsonObject("high").get("url").getAsString();
+            } else if (thumbnailObject.has("medium")) {
+                bgImage = thumbnailObject.getAsJsonObject("medium").get("url").getAsString();
+            } else if (thumbnailObject.has("default")) {
+                bgImage = thumbnailObject.getAsJsonObject("default").get("url").getAsString();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Failed to fetch snippet " + youtubeId);
+        }
+
+        try {
+            JsonObject detailObject = itemObject.getAsJsonObject("contentDetails");
+            // "PT1H1M13S"
+            String formattedDuration = detailObject.get("duration").getAsString();
+            duration = (int) Period.parse(formattedDuration, ISOPeriodFormat.standard())
+                    .toStandardDuration().getMillis() / 1000;
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Failed to fetch contentDetails of " + youtubeId);
+        }
+
+        try {
+            JsonObject statisticsObject = itemObject.getAsJsonObject("statistics");
+            views = Integer.parseInt(statisticsObject.get("viewCount").getAsString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Failed to fetch statistics of " + youtubeId);
+        }
+
+        return new Video(name, description, publishedTime, duration, bgImage, url, views, youtubeId);
+    }
+
+    private static Video deserializeVideoPlaylist(JsonElement json, Type type, JsonDeserializationContext context) {
         JsonObject itemObject = json.getAsJsonObject();
 
         String youtubeId = itemObject.get("id").getAsString();
@@ -346,5 +407,58 @@ public class ApiService {
             comments.addAll(getCommentsFromVideo(videoId, nextPageToken, --count));
         }
         return comments;
+    }
+
+    public List<Video> getVideoFromChannelPlaylist(String youtubeId) throws RetryException, RunOutKeyException, IOException {
+        String playlistId = "UU" + youtubeId.substring(2);
+
+        Map<String, String> query = new HashMap<>();
+        String response;
+        JsonObject responseJson;
+        JsonArray items;
+
+        query.put("playlistId", playlistId);
+        query.put("part", "snippet");
+        query.put("maxResults", String.valueOf(parsedConfig.getVideosLimit()));
+        response = makeServiceRequest(PATH_PLAYLIST_ITEMS, query);
+        responseJson = gson.fromJson(response, JsonObject.class);
+        if (!responseJson.has("items")) {
+            throw new IOException(responseJson.toString());
+        }
+        StringBuilder listQueryVideoId = new StringBuilder();
+        items = responseJson.getAsJsonArray("items");
+        for (JsonElement item : items) {
+            String videoId = null;
+            try {
+                JsonObject snippetObject = item.getAsJsonObject().getAsJsonObject("snippet");
+                JsonObject resourceId = snippetObject.getAsJsonObject("resourceId");
+                videoId = resourceId.get("videoId").getAsString();
+            } catch (Exception e) {
+                // item contains playlist id
+                 System.out.println("Item don't have video id " + item.toString());
+            }
+            if (videoId == null) {
+                continue;
+            }
+            listQueryVideoId.append(videoId);
+            if (!items.get(items.size() - 1).equals(item)) {
+                listQueryVideoId.append(",");
+            }
+        }
+        query.clear();
+        query.put("id", listQueryVideoId.toString());
+        query.put("part", "snippet,statistics,contentDetails");
+        response = makeServiceRequest(PATH_VIDEO_DETAILS, query);
+        responseJson = gson.fromJson(response, JsonObject.class);
+        if (!responseJson.has("items")) {
+            throw new IOException(responseJson.toString());
+        }
+        List<Video> videos = new ArrayList<>();
+        items = responseJson.getAsJsonArray("items");
+        for (JsonElement item : items) {
+            Video video = gson.fromJson(item, Video.class);
+            videos.add(video);
+        }
+        return videos;
     }
 }
