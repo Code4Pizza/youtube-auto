@@ -4,12 +4,15 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SharedMetricRegistries;
 import com.codahale.metrics.Timer;
 import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.core.statement.PreparedBatch;
+import org.jdbi.v3.core.transaction.TransactionIsolationLevel;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.webfilm.entity.Channel;
 import org.webfilm.entity.Comment;
 import org.webfilm.entity.ParsedConfig;
 import org.webfilm.entity.Video;
 import org.youtube.configuration.CircuitBreakerConfiguration;
+import org.youtube.entities.YoutubeAccount;
 import org.youtube.storage.FaultTolerantDatabase;
 import org.youtube.util.Constants;
 
@@ -101,7 +104,8 @@ public class WebFilmDatabase {
                         video.getViews(),
                         video.getBgImage(),
                         video.getYoutubeId(),
-                        video.getChannelId()
+                        video.getChannelId(),
+                        video.getUrlPreview()
                 ) > 0;
             }
         }));
@@ -259,6 +263,36 @@ public class WebFilmDatabase {
         return database.with(jdbi -> jdbi.withHandle(handle -> {
             try (Timer.Context ignored = defaultTimer.time()) {
                 return handle.attach(WebFilmDAO.class).getCommentById(videoId, commentId);
+            }
+        }));
+    }
+
+    public void deleteVideoTags(int videoId) {
+        database.with(jdbi -> jdbi.withHandle(handle -> {
+            try (Timer.Context ignored = defaultTimer.time()) {
+                handle.attach(WebFilmDAO.class).deleteVideoTags(videoId, 1);
+                return null;
+            }
+        }));
+    }
+
+    public void insertVideoTags(int id, List<String> tags) {
+        String sql = " insert into tags(tag_id, tag_name, tag_type) values(:id, :name, :type)";
+        database.use(jdbi -> jdbi.useTransaction(TransactionIsolationLevel.SERIALIZABLE, handle -> {
+            try (Timer.Context ignored = defaultTimer.time()) {
+                PreparedBatch preparedBatch = handle.prepareBatch(sql);
+
+                for (String tag : tags) {
+                    preparedBatch
+                            .bind("id", id)
+                            .bind("name", tag)
+                            .bind("type", 1)
+                            .add();
+                }
+
+                if (preparedBatch.size() > 0) {
+                    preparedBatch.execute();
+                }
             }
         }));
     }

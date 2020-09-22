@@ -34,15 +34,18 @@ public interface WebFilmDAO {
     @RegisterConstructorMapper(Comment.class)
     Comment getCommentById(@Bind("video_id") String videoId, @Bind("comment_id") String commentId);
 
-    @SqlUpdate("UPDATE videos SET `name`=:name, description=:description, publish_time=:publishTime, duration=:duration, url=:url, views=:views, bg_image=:bg_image, channel_id=:channel_id " +
+    @SqlUpdate("UPDATE videos SET `name`=:name, description=:description, publish_time=:publishTime," +
+            "url_preview=:url_preview, " +
+            " duration=:duration, url=:url, views=:views, bg_image=:bg_image, channel_id=:channel_id " +
             "WHERE youtube_id=:youtube_id")
     int updateVideo(@Bind("name") String name, @Bind("description") String description, @Bind("duration") int duration,
                     @Bind("publishTime") Timestamp publishTime,
                     @Bind("url") String url, @Bind("views") int views, @Bind("bg_image") String bgImage,
-                    @Bind("youtube_id") String youtubeId, @Bind("channel_id") int channelId);
+                    @Bind("youtube_id") String youtubeId, @Bind("channel_id") int channelId,
+                    @Bind("url_preview") String urlPreview);
 
-    @SqlUpdate("INSERT INTO videos(`name`, description, publish_time, duration, url, views, bg_image, youtube_id, channel_id) " +
-            "VALUES(:name, :description, :publishTime, :duration, :url, :views, :bgImage, :youtubeId, :channelId)")
+    @SqlUpdate("INSERT INTO videos(`name`, description, publish_time, duration, url, views, bg_image, youtube_id, channel_id, url_preview) " +
+            "VALUES(:name, :description, :publishTime, :duration, :url, :views, :bgImage, :youtubeId, :channelId, :urlPreview)")
     @GetGeneratedKeys
     int insertVideo(@BindBean Video video);
 
@@ -100,4 +103,6 @@ public interface WebFilmDAO {
     @SqlUpdate("delete from video_menu_mapping where video_id in (select id from videos where youtube_id=:video_id)")
     void deleteVideoMenuMapping(@Bind("video_id") String videoId);
 
+    @SqlUpdate("delete from tags where tag_id = :id and tag_type = :type")
+    void deleteVideoTags(@Bind("id") int videoId, @Bind("type") int type);
 }

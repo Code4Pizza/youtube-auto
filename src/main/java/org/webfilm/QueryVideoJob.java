@@ -40,7 +40,12 @@ public class QueryVideoJob implements Runnable {
     public void run() {
         try {
             System.out.println("==============> Fetching videos from channel " + channel.getName());
-            List<Video> remoteVideos = apiService.getVideosFromChannel(channel.getYoutubeId());
+//            List<Video> remoteVideos = apiService.getVideosFromChannel(channel.getYoutubeId());
+//            if (remoteVideos.size() == 0){
+//                remoteVideos = apiService.getVideoFromChannelPlaylist(channel.getYoutubeId());
+//            }
+
+            List<Video> remoteVideos = apiService.getVideoFromChannelPlaylist(channel.getYoutubeId());
             List<Video> currentVideos = database.getVideos(channel.getId());
             Map<String, Boolean> checkMapper = new HashMap<>();
 
@@ -54,12 +59,15 @@ public class QueryVideoJob implements Runnable {
                 if (localVideo != null) {
                     // Update video and mapping
                     database.updateVideo(remoteVideo);
-                    // database.updateVideoChannelMapping(id, channel.getId());
+//                    database.deleteVideoTags(localVideo.getId());
+//                    database.insertVideoTags(localVideo.getId(), remoteVideo.getTags());
                     countUpdated++;
                 } else {
                     // Insert video and mapping
                     int id = database.insertVideo(remoteVideo);
                     database.insertVideoChannelMapping(id, channel.getId());
+//                    if (remoteVideo.getTags() != null && remoteVideo.getTags().size() > 0)
+//                        database.insertVideoTags(id, remoteVideo.getTags());
                     countInserted++;
                 }
 

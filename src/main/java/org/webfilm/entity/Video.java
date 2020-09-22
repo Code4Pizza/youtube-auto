@@ -17,6 +17,11 @@ public class Video {
     private String name;
 
     @JsonProperty
+    @ColumnName("url_preview")
+    private String urlPreview;
+
+    @JsonProperty
+    @ColumnName("publish_time")
     private Timestamp publishTime;
 
     @JsonProperty
@@ -58,10 +63,9 @@ public class Video {
         this.views = views;
         this.youtubeId = youtubeId;
         this.publishTime = publishTime;
-        this.tags = tags;
     }
 
-    @ConstructorProperties({"id, name, description, duration, bg_image, url, views, youtube_id, channel_id,publish_time"})
+    @ConstructorProperties({"id, name, description, duration, bg_image, url, views, youtube_id, channel_id, url_preview"})
     public Video(@ColumnName(("id")) int id,
                  @ColumnName(("name")) String name,
                  @ColumnName(("description")) String description,
@@ -69,9 +73,9 @@ public class Video {
                  @ColumnName(("bg_image")) String bgImage,
                  @ColumnName(("url")) String url,
                  @ColumnName(("views")) int views,
-                 @ColumnName(("publish_time")) Timestamp publishTime,
                  @ColumnName(("youtube_id")) String youtubeId,
-                 @ColumnName(("channel_id")) int channelId) {
+                 @ColumnName(("channel_id")) int channelId,
+                 @ColumnName(("url_preview")) String urlPreview) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -81,8 +85,9 @@ public class Video {
         this.views = views;
         this.youtubeId = youtubeId;
         this.channelId = channelId;
-        this.publishTime = publishTime;
+        this.urlPreview = urlPreview;
     }
+
 
     public int getId() {
         return id;
@@ -139,17 +144,21 @@ public class Video {
         this.tags = tags;
     }
 
+    public String getUrlPreview() {
+        return urlPreview;
+    }
+
+    public void setUrlPreview(String urlPreview) {
+        this.urlPreview = urlPreview;
+    }
+
     @Override
     public String toString() {
         return "Video{" +
-//                "id=" + id +
                 ", name='" + name + '\'' +
                 ", duration=" + duration +
-//                ", bgImage='" + bgImage + '\'' +
-//                ", url='" + url + '\'' +
                 ", views=" + views +
                 ", youtubeId='" + youtubeId + '\'' +
-//                ", description='" + description + '\'' +
                 '}';
     }
 

@@ -27,6 +27,7 @@ public class ApiService {
     public static final String BASE_URL = "https://www.googleapis.com/youtube/v3";
     public static final String PATH_LIST_VIDEO = "/search";
     public static final String PATH_VIDEO_DETAILS = "/videos";
+    public static final String PATH_PLAYLIST_ITEMS = "/playlistItems";
     public static final String PATH_CHANNEL_INFO = "/channels";
     public static final String PATH_COMMENTS = "/commentThreads";
 
@@ -54,6 +55,7 @@ public class ApiService {
         String url = String.format("https://www.youtube.com/embed/%s", youtubeId);
 
         String name = "";
+        String urlName = "";
         String publishedAt = "";
         String description = "";
         int duration = 0;
@@ -65,13 +67,17 @@ public class ApiService {
         try {
             JsonObject snippetObject = itemObject.getAsJsonObject("snippet");
             name = snippetObject.get("title").getAsString();
+            urlName = name.replaceAll(" +", " ").replaceAll(" ", "-");
             publishedAt = snippetObject.get("publishedAt").getAsString();
             // format to timestamp
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
             publishedTime = new Timestamp(format.parse(publishedAt).getTime());
-            snippetObject.getAsJsonArray("tags").forEach(item -> {
-                tags.add(item.getAsString());
-            });
+            JsonArray jsonArray = snippetObject.getAsJsonArray("tags");
+            if (jsonArray != null)
+                jsonArray.forEach(item -> {
+                    if (!tags.contains(item.getAsString().trim()))
+                        tags.add(item.getAsString().trim());
+                });
 
             description = snippetObject.get("description").getAsString().replaceAll("\n+", "\n");
             JsonObject thumbnailObject = snippetObject.getAsJsonObject("thumbnails");
@@ -110,6 +116,7 @@ public class ApiService {
         System.out.println("Tag of " + name + " is : " + new Gson().toJson(tags));
         Video video = new Video(name, description, publishedTime, duration, bgImage, url, views, youtubeId);
         video.setTags(tags);
+        video.setUrlPreview(urlName);
         return video;
     }
 
@@ -352,5 +359,58 @@ public class ApiService {
             comments.addAll(getCommentsFromVideo(videoId, nextPageToken, --count));
         }
         return comments;
+    }
+
+    public List<Video> getVideoFromChannelPlaylist(String youtubeId) throws RetryException, RunOutKeyException, IOException {
+        String playlistId = "UU" + youtubeId.substring(2);
+
+        Map<String, String> query = new HashMap<>();
+        String response;
+        JsonObject responseJson;
+        JsonArray items;
+
+        query.put("playlistId", playlistId);
+        query.put("part", "snippet");
+        query.put("maxResults", String.valueOf(parsedConfig.getVideosLimit()));
+        response = makeServiceRequest(PATH_PLAYLIST_ITEMS, query);
+        responseJson = gson.fromJson(response, JsonObject.class);
+        if (!responseJson.has("items")) {
+            throw new IOException(responseJson.toString());
+        }
+        StringBuilder listQueryVideoId = new StringBuilder();
+        items = responseJson.getAsJsonArray("items");
+        for (JsonElement item : items) {
+            String videoId = null;
+            try {
+                JsonObject snippetObject = item.getAsJsonObject().getAsJsonObject("snippet");
+                JsonObject resourceId = snippetObject.getAsJsonObject("resourceId");
+                videoId = resourceId.get("videoId").getAsString();
+            } catch (Exception e) {
+                // item contains playlist id
+                System.out.println("Item don't have video id " + item.toString());
+            }
+            if (videoId == null) {
+                continue;
+            }
+            listQueryVideoId.append(videoId);
+            if (!items.get(items.size() - 1).equals(item)) {
+                listQueryVideoId.append(",");
+            }
+        }
+        query.clear();
+        query.put("id", listQueryVideoId.toString());
+        query.put("part", "snippet,statistics,contentDetails");
+        response = makeServiceRequest(PATH_VIDEO_DETAILS, query);
+        responseJson = gson.fromJson(response, JsonObject.class);
+        if (!responseJson.has("items")) {
+            throw new IOException(responseJson.toString());
+        }
+        List<Video> videos = new ArrayList<>();
+        items = responseJson.getAsJsonArray("items");
+        for (JsonElement item : items) {
+            Video video = gson.fromJson(item, Video.class);
+            videos.add(video);
+        }
+        return videos;
     }
 }
