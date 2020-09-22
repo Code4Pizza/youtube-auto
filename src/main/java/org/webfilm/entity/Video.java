@@ -5,6 +5,7 @@ import org.jdbi.v3.core.mapper.reflect.ColumnName;
 
 import java.beans.ConstructorProperties;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Objects;
 
 public class Video {
@@ -17,6 +18,9 @@ public class Video {
 
     @JsonProperty
     private Timestamp publishTime;
+
+    @JsonProperty
+    private List<String> tags;
 
     @JsonProperty
     private String description;
@@ -44,7 +48,8 @@ public class Video {
 
     public Video(String name, String description,
                  Timestamp publishTime,
-                 int duration, String bgImage, String url, int views, String youtubeId) {
+                 int duration, String bgImage, String url, int views,
+                 String youtubeId) {
         this.name = name;
         this.description = description;
         this.duration = duration;
@@ -53,9 +58,10 @@ public class Video {
         this.views = views;
         this.youtubeId = youtubeId;
         this.publishTime = publishTime;
+        this.tags = tags;
     }
 
-    @ConstructorProperties({"id, name, description, duration, bg_image, url, views, youtube_id, channel_id"})
+    @ConstructorProperties({"id, name, description, duration, bg_image, url, views, youtube_id, channel_id,publish_time"})
     public Video(@ColumnName(("id")) int id,
                  @ColumnName(("name")) String name,
                  @ColumnName(("description")) String description,
@@ -123,6 +129,14 @@ public class Video {
 
     public Timestamp getPublishTime() {
         return publishTime;
+    }
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
     }
 
     @Override

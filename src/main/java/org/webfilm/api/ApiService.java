@@ -60,6 +60,7 @@ public class ApiService {
         String bgImage = "";
         int views = 0;
         Timestamp publishedTime = null;
+        List<String> tags = new ArrayList<>();
 
         try {
             JsonObject snippetObject = itemObject.getAsJsonObject("snippet");
@@ -68,6 +69,9 @@ public class ApiService {
             // format to timestamp
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
             publishedTime = new Timestamp(format.parse(publishedAt).getTime());
+            snippetObject.getAsJsonArray("tags").forEach(item -> {
+                tags.add(item.getAsString());
+            });
 
             description = snippetObject.get("description").getAsString().replaceAll("\n+", "\n");
             JsonObject thumbnailObject = snippetObject.getAsJsonObject("thumbnails");
@@ -103,8 +107,10 @@ public class ApiService {
             e.printStackTrace();
             System.out.println("Failed to fetch statistics of " + youtubeId);
         }
-
-        return new Video(name, description, publishedTime, duration, bgImage, url, views, youtubeId);
+        System.out.println("Tag of " + name + " is : " + new Gson().toJson(tags));
+        Video video = new Video(name, description, publishedTime, duration, bgImage, url, views, youtubeId);
+        video.setTags(tags);
+        return video;
     }
 
     private static Channel deserializeChannel(JsonElement json, Type type, JsonDeserializationContext context) {
