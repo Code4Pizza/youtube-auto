@@ -253,7 +253,8 @@ public class ApiService {
         }
     }
 
-    public List<Channel> getChannelInfos(String listQueryChannelId) throws IOException, RetryException, RunOutKeyException {
+    public List<Channel> getChannelInfos(String listQueryChannelId) throws IOException, RetryException,
+            RunOutKeyException, JsonSyntaxException {
         Map<String, String> query = new HashMap<>();
         query.put("id", listQueryChannelId);
         query.put("part", "snippet,statistics");

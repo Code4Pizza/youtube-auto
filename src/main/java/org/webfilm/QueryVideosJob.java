@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static org.webfilm.util.DateUtil.isChannelUpToDate;
 
@@ -49,6 +50,7 @@ public class QueryVideosJob {
         System.out.println("Start query videos job");
 
         List<Channel> channels = database.getChannels();
+//                .stream().filter(item -> item.getYoutubeId().equalsIgnoreCase("UCPdD7lAkjTbL-6f38Yf3jcQ")).collect(Collectors.toList());
         // sub lại ít channel test cho dễ
 //         channels = channels.subList(channels.size() - 1, channels.size());
         System.out.println("Total channels fetched " + channels.size());
