@@ -59,15 +59,15 @@ public class QueryVideoJob implements Runnable {
                 if (localVideo != null) {
                     // Update video and mapping
                     database.updateVideo(remoteVideo);
-//                    database.deleteVideoTags(localVideo.getId());
-//                    database.insertVideoTags(localVideo.getId(), remoteVideo.getTags());
+                    database.deleteVideoTags(localVideo.getId());
+                    database.insertVideoTags(localVideo.getId(), remoteVideo.getTags());
                     countUpdated++;
                 } else {
                     // Insert video and mapping
                     int id = database.insertVideo(remoteVideo);
                     database.insertVideoChannelMapping(id, channel.getId());
-//                    if (remoteVideo.getTags() != null && remoteVideo.getTags().size() > 0)
-//                        database.insertVideoTags(id, remoteVideo.getTags());
+                    if (remoteVideo.getTags() != null && remoteVideo.getTags().size() > 0)
+                        database.insertVideoTags(id, remoteVideo.getTags());
                     countInserted++;
                 }
 

@@ -21,6 +21,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class ApiService {
 
@@ -75,8 +76,8 @@ public class ApiService {
             JsonArray jsonArray = snippetObject.getAsJsonArray("tags");
             if (jsonArray != null)
                 jsonArray.forEach(item -> {
-                    if (!tags.contains(item.getAsString().trim()))
-                        tags.add(item.getAsString().trim());
+                    if (!tags.contains(item.getAsString().trim().toLowerCase()))
+                        tags.add(item.getAsString().trim().toLowerCase());
                 });
 
             description = snippetObject.get("description").getAsString().replaceAll("\n+", "\n");
@@ -115,7 +116,7 @@ public class ApiService {
         }
         System.out.println("Tag of " + name + " is : " + new Gson().toJson(tags));
         Video video = new Video(name, description, publishedTime, duration, bgImage, url, views, youtubeId);
-        video.setTags(tags);
+        video.setTags(tags.stream().distinct().collect(Collectors.toList()));
         video.setUrlPreview(urlName);
         return video;
     }

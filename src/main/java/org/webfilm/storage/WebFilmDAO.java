@@ -105,4 +105,14 @@ public interface WebFilmDAO {
 
     @SqlUpdate("delete from tags where tag_id = :id and tag_type = :type")
     void deleteVideoTags(@Bind("id") int videoId, @Bind("type") int type);
+
+
+    @SqlUpdate("delete from channels where youtube_id =:id")
+    void deleteChannel(@Bind("id") String youtubeId);
+
+    @SqlUpdate("delete from livestream_channel_mapping where channel_id = (select id from channels where youtube_id =:id)")
+    void deleteVideosInChannel(@Bind("id") String youtubeId);
+
+    @SqlUpdate("delete from video_channel_mapping where channel_id = (select id from channels where youtube_id =:id)")
+    void deleteLivestreamInChannel(@Bind("id") String youtubeId);
 }

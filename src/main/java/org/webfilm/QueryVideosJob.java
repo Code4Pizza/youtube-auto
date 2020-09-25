@@ -8,6 +8,7 @@ import org.webfilm.entity.ParsedConfig;
 import org.webfilm.storage.WebFilmDatabase;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -79,7 +80,7 @@ public class QueryVideosJob {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println("Query videos job finished");
+        System.out.println("Query videos job finished ");
     }
 
     private void updateChannelInfo(List<Channel> channels) throws IOException, RetryException, RunOutKeyException {
@@ -91,6 +92,18 @@ public class QueryVideosJob {
             }
         }
         List<Channel> infos = apiService.getChannelInfos(listQueryChannelId.toString());
+
+        // compare deleted channel
+        if (infos.size() < channels.size()) {
+            channels.forEach(item -> {
+                if (infos.stream().noneMatch(c -> c.getYoutubeId().equals(item.getYoutubeId()))) {
+                    System.out.println("Start delete channel : " + item.getName());
+                    database.deleteChanel(item);
+                }
+            });
+        }
+
+
         database.bulkUpdateChannelInfo(infos);
     }
 
@@ -113,7 +126,7 @@ public class QueryVideosJob {
             System.out.println("Job done in " + endTime + " mins");
             System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
             try {
-                // Waiting 30 mis to repeat job
+                // Waiting 10 mis to repeat job
                 TimeUnit.MINUTES.sleep(30);
             } catch (InterruptedException e) {
                 e.printStackTrace();

@@ -296,4 +296,15 @@ public class WebFilmDatabase {
             }
         }));
     }
+
+    public void deleteChanel(Channel channel) {
+        database.with(jdbi -> jdbi.withHandle(handle -> {
+            try (Timer.Context ignored = defaultTimer.time()) {
+                handle.attach(WebFilmDAO.class).deleteVideosInChannel(channel.getYoutubeId());
+                handle.attach(WebFilmDAO.class).deleteLivestreamInChannel(channel.getYoutubeId());
+                handle.attach(WebFilmDAO.class).deleteChannel(channel.getYoutubeId());
+                return null;
+            }
+        }));
+    }
 }
