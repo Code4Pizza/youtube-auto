@@ -323,6 +323,57 @@ public class ApiService {
         return videos;
     }
 
+    public List<Video> getLivesFromChannel(String channelId) throws IOException, RetryException, RunOutKeyException {
+        Map<String, String> query = new HashMap<>();
+        String response;
+        JsonObject responseJson;
+        JsonArray items;
+
+        query.put("channelId", channelId);
+        query.put("part", "snippet");
+        query.put("eventType", "live");
+        query.put("type", "video");
+        query.put("maxResults", String.valueOf(parsedConfig.getVideosLimit()));
+        response = makeServiceRequest(PATH_LIST_VIDEO, query);
+        responseJson = gson.fromJson(response, JsonObject.class);
+        if (!responseJson.has("items")) {
+            throw new IOException(responseJson.toString());
+        }
+
+        List<Video> videos = new ArrayList<>();
+
+        items = responseJson.getAsJsonArray("items");
+        for (JsonElement item : items) {
+            Video video = new Video();
+            String videoId = null;
+            try {
+                JsonObject idObject = item.getAsJsonObject().getAsJsonObject("id");
+                videoId = idObject.get("videoId").getAsString();
+                video.setYoutubeId(videoId);
+                video.setUrl(String.format("https://www.youtube.com/embed/%s", videoId));
+            } catch (Exception e) {
+                // item contains playlist id
+                System.out.println("Item don't have video id " + item.toString());
+            }
+            try {
+                JsonObject snippet = item.getAsJsonObject().getAsJsonObject("snippet");
+                video.setName(snippet.get("title").getAsString());
+                video.setDescription(snippet.get("description").getAsString());
+                try {
+                    JsonObject thumbnail = snippet.getAsJsonObject("thumbnails").getAsJsonObject("medium");
+                    video.setBgImage(thumbnail.get("url").getAsString());
+                } catch (Exception e) {
+                    System.out.println("Do not find thumbnail");
+                }
+            } catch (Exception e) {
+                System.out.println("Item do not have snippet");
+            }
+            videos.add(video);
+        }
+
+        return videos;
+    }
+
     public Set<Comment> getCommentsFromVideo(String videoId, @Nullable String nextPageToken, int count) throws RetryException, RunOutKeyException, IOException {
         Map<String, String> query = new HashMap<>();
         String response;

@@ -88,6 +88,33 @@ public class Video {
         this.urlPreview = urlPreview;
     }
 
+    public void setYoutubeId(String youtubeId) {
+        this.youtubeId = youtubeId;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setPublishTime(Timestamp publishTime) {
+        this.publishTime = publishTime;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
+
+    public void setBgImage(String bgImage) {
+        this.bgImage = bgImage;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
 
     public int getId() {
         return id;

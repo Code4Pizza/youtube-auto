@@ -51,7 +51,7 @@ public class QueryVideosJob {
         System.out.println("Start query videos job");
 
         List<Channel> channels = database.getChannels();
-//                .stream().filter(item -> item.getYoutubeId().equalsIgnoreCase("UCPdD7lAkjTbL-6f38Yf3jcQ")).collect(Collectors.toList());
+//                .stream().filter(item -> item.getYoutubeId().equalsIgnoreCase("UCXF4WjTCUQSmGapnNEZzbYw")).collect(Collectors.toList());
         // sub lại ít channel test cho dễ
 //         channels = channels.subList(channels.size() - 1, channels.size());
         System.out.println("Total channels fetched " + channels.size());

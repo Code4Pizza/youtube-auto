@@ -307,4 +307,34 @@ public class WebFilmDatabase {
             }
         }));
     }
+
+    public boolean checkLivestreamByURL(String url) {
+        return database.with(jdbi -> jdbi.withHandle(handle -> {
+            try (Timer.Context ignored = defaultTimer.time()) {
+                return handle.attach(WebFilmDAO.class).checkLivestreamByURL(url) > 0;
+            }
+        }));
+    }
+
+    public int insertLivestream(Video live) {
+        return database.with(jdbi -> jdbi.withHandle(handle -> {
+            try (Timer.Context ignored = defaultTimer.time()) {
+                return handle.attach(WebFilmDAO.class).insertLivestream(live);
+            }
+        }));
+    }
+
+    public void insertLivestreamMapping(int liveId, int channelId) {
+
+    }
+
+    public void updateLivestream(Video live) {
+        database.with(jdbi -> jdbi.withHandle(handle -> {
+            try (Timer.Context ignored = defaultTimer.time()) {
+                handle.attach(WebFilmDAO.class).updateLivestream(live.getName(), live.getDescription(),
+                        live.getUrl());
+            }
+            return null;
+        }));
+    }
 }

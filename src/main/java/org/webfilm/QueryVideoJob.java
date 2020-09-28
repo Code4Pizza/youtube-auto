@@ -45,45 +45,61 @@ public class QueryVideoJob implements Runnable {
 //                remoteVideos = apiService.getVideoFromChannelPlaylist(channel.getYoutubeId());
 //            }
 
-            List<Video> remoteVideos = apiService.getVideoFromChannelPlaylist(channel.getYoutubeId());
-            List<Video> currentVideos = database.getVideos(channel.getId());
-            Map<String, Boolean> checkMapper = new HashMap<>();
+//            List<Video> remoteVideos = apiService.getVideoFromChannelPlaylist(channel.getYoutubeId());
+//            List<Video> currentVideos = database.getVideos(channel.getId());
+//            Map<String, Boolean> checkMapper = new HashMap<>();
+//
+//            int countInserted = 0;
+//            int countUpdated = 0;
+//            AtomicInteger countDeleted = new AtomicInteger();
+//            for (Video remoteVideo : remoteVideos) {
+//                checkMapper.put(remoteVideo.getYoutubeId(), true);
+//                remoteVideo.setChannelId(channel.getId());
+//                Video localVideo = database.isVideoExisted(channel.getId(), remoteVideo.getYoutubeId());
+//                if (localVideo != null) {
+//                    // Update video and mapping
+//                    database.updateVideo(remoteVideo);
+//                    database.deleteVideoTags(localVideo.getId());
+//                    database.insertVideoTags(localVideo.getId(), remoteVideo.getTags());
+//                    countUpdated++;
+//                } else {
+//                    // Insert video and mapping
+//                    int id = database.insertVideo(remoteVideo);
+//                    database.insertVideoChannelMapping(id, channel.getId());
+//                    if (remoteVideo.getTags() != null && remoteVideo.getTags().size() > 0)
+//                        database.insertVideoTags(id, remoteVideo.getTags());
+//                    countInserted++;
+//                }
+//
+//            }
+//            currentVideos.forEach(video -> {
+//                if (checkMapper.get(video.getYoutubeId()) == null) {
+//                    database.deleteVideoMappingById(video.getYoutubeId());
+//                    database.deleteVideoById(video.getYoutubeId());
+//                    countDeleted.getAndIncrement();
+//                }
+//            });
+//
+//            System.out.println("==============> Channel " + channel.getName() + "(id:" + channel.getYoutubeId() + ")" +
+//                    " fetched " + remoteVideos.size() + " videos ( inserted: " + countInserted
+//                    + ", updated: " + countUpdated + ", deleted: " + countDeleted.get() + ")");
+//
 
-            int countInserted = 0;
-            int countUpdated = 0;
-            AtomicInteger countDeleted = new AtomicInteger();
-            for (Video remoteVideo : remoteVideos) {
-                checkMapper.put(remoteVideo.getYoutubeId(), true);
-                remoteVideo.setChannelId(channel.getId());
-                Video localVideo = database.isVideoExisted(channel.getId(), remoteVideo.getYoutubeId());
-                if (localVideo != null) {
-                    // Update video and mapping
-                    database.updateVideo(remoteVideo);
-                    database.deleteVideoTags(localVideo.getId());
-                    database.insertVideoTags(localVideo.getId(), remoteVideo.getTags());
-                    countUpdated++;
+            // for livestream
+            List<Video> livestreams = apiService.getLivesFromChannel(channel.getYoutubeId());
+            livestreams.forEach(live -> {
+                // check and insert live
+                if (!database.checkLivestreamByURL(live.getUrl())) {
+                    database.insertLivestream(live);
                 } else {
-                    // Insert video and mapping
-                    int id = database.insertVideo(remoteVideo);
-                    database.insertVideoChannelMapping(id, channel.getId());
-                    if (remoteVideo.getTags() != null && remoteVideo.getTags().size() > 0)
-                        database.insertVideoTags(id, remoteVideo.getTags());
-                    countInserted++;
-                }
-
-            }
-            currentVideos.forEach(video -> {
-                if (checkMapper.get(video.getYoutubeId()) == null) {
-                    database.deleteVideoMappingById(video.getYoutubeId());
-                    database.deleteVideoById(video.getYoutubeId());
-                    countDeleted.getAndIncrement();
+                    //update
+                    database.updateLivestream(live);
                 }
             });
+
+
             String updatedTime = DateUtil.convertStringDate(System.currentTimeMillis());
             database.updateChannelUpdatedTime(updatedTime, channel.getYoutubeId());
-            System.out.println("==============> Channel " + channel.getName() + "(id:" + channel.getYoutubeId() + ")" +
-                    " fetched " + remoteVideos.size() + " videos ( inserted: " + countInserted
-                    + ", updated: " + countUpdated + ", deleted: " + countDeleted.get() + ")");
 
             if (QueryVideosJob.updateCommentsJobCountdown.get() == 0) {
                 System.out.println("Update comments is out of quote, passed");

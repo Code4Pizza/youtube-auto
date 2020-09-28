@@ -30,6 +30,9 @@ public interface WebFilmDAO {
     @RegisterConstructorMapper(Video.class)
     Video getVideoByYoutubeId(@Bind("channel_id") int channelId, @Bind("youtube_id") String youtubeId);
 
+    @SqlQuery("select count(*) as total from livestreams where url=:url")
+    Integer checkLivestreamByURL(@Bind("url") String url);
+
     @SqlQuery("SELECT * FROM comments WHERE video_id=:video_id AND comment_id=:comment_id")
     @RegisterConstructorMapper(Comment.class)
     Comment getCommentById(@Bind("video_id") String videoId, @Bind("comment_id") String commentId);
@@ -115,4 +118,17 @@ public interface WebFilmDAO {
 
     @SqlUpdate("delete from video_channel_mapping where channel_id = (select id from channels where youtube_id =:id)")
     void deleteLivestreamInChannel(@Bind("id") String youtubeId);
+
+    @SqlUpdate("INSERT INTO web_film.livestreams\n" +
+            "(live_name, live_description, bg_image, created_at, end_time, live_start, `type`, url)\n" +
+            "VALUES(:name, :description, :bgImage, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1, :url);\n")
+    @GetGeneratedKeys
+    int insertLivestream(@BindBean Video video);
+
+    @SqlUpdate("INSERT INTO live_channel_mapping(live_id, channel_id) VALUES(:live_id, :channel_id)")
+    int insertLiveChannelMapping(@Bind("live_id") int videoId, @Bind("channel_id") int channelId);
+
+    @SqlUpdate("update livestreams set live_name=:name, live_description=:description where url=:url")
+    void updateLivestream(@Bind("live_name") String name, @Bind("live_description") String description,
+                          @Bind("url") String url);
 }
