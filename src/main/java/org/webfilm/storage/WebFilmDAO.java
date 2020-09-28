@@ -113,10 +113,14 @@ public interface WebFilmDAO {
     @SqlUpdate("delete from channels where youtube_id =:id")
     void deleteChannel(@Bind("id") String youtubeId);
 
-    @SqlUpdate("delete from livestream_channel_mapping where channel_id = (select id from channels where youtube_id =:id)")
-    void deleteVideosInChannel(@Bind("id") String youtubeId);
+
+    @SqlUpdate("delete from videos where channel_id =(select id from channels where youtube_id =:id)")
+    void deleteVideosInChannel(@Bind("id") String channelId);
 
     @SqlUpdate("delete from video_channel_mapping where channel_id = (select id from channels where youtube_id =:id)")
+    void deleteVideoMappingInChannel(@Bind("id") String youtubeId);
+
+    @SqlUpdate("delete from livestream_channel_mapping where channel_id = (select id from channels where youtube_id =:id)")
     void deleteLivestreamInChannel(@Bind("id") String youtubeId);
 
     @SqlUpdate("INSERT INTO web_film.livestreams\n" +
@@ -129,6 +133,7 @@ public interface WebFilmDAO {
     int insertLiveChannelMapping(@Bind("live_id") int videoId, @Bind("channel_id") int channelId);
 
     @SqlUpdate("update livestreams set live_name=:name, live_description=:description where url=:url")
-    void updateLivestream(@Bind("live_name") String name, @Bind("live_description") String description,
+    void updateLivestream(@Bind("name") String name, @Bind("description") String description,
                           @Bind("url") String url);
+
 }
