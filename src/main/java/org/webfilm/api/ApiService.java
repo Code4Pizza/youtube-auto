@@ -82,10 +82,12 @@ public class ApiService {
 
             description = snippetObject.get("description").getAsString().replaceAll("\n+", "\n");
             JsonObject thumbnailObject = snippetObject.getAsJsonObject("thumbnails");
-            if (thumbnailObject.has("maxres")) {
-                bgImage = thumbnailObject.getAsJsonObject("maxres").get("url").getAsString();
-            } else if (thumbnailObject.has("high")) {
+            if (thumbnailObject.has("high")) {
                 bgImage = thumbnailObject.getAsJsonObject("high").get("url").getAsString();
+            } else if (thumbnailObject.has("standard")) {
+                bgImage = thumbnailObject.getAsJsonObject("standard").get("url").getAsString();
+            } else if (thumbnailObject.has("maxres")) {
+                bgImage = thumbnailObject.getAsJsonObject("maxres").get("url").getAsString();
             } else if (thumbnailObject.has("medium")) {
                 bgImage = thumbnailObject.getAsJsonObject("medium").get("url").getAsString();
             } else if (thumbnailObject.has("default")) {
@@ -360,7 +362,7 @@ public class ApiService {
                 video.setName(snippet.get("title").getAsString());
                 video.setDescription(snippet.get("description").getAsString());
                 try {
-                    JsonObject thumbnail = snippet.getAsJsonObject("thumbnails").getAsJsonObject("medium");
+                    JsonObject thumbnail = snippet.getAsJsonObject("thumbnails").getAsJsonObject("high");
                     video.setBgImage(thumbnail.get("url").getAsString());
                 } catch (Exception e) {
                     System.out.println("Do not find thumbnail");
