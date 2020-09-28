@@ -17,6 +17,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class QueryVideoJob implements Runnable {
 
@@ -41,61 +42,68 @@ public class QueryVideoJob implements Runnable {
         try {
             System.out.println("==============> Fetching videos from channel " + channel.getName());
 //            List<Video> remoteVideos = apiService.getVideosFromChannel(channel.getYoutubeId());
-//            if (remoteVideos.size() == 0){
+//            if (remoteVideos.size() == 0) {
 //                remoteVideos = apiService.getVideoFromChannelPlaylist(channel.getYoutubeId());
 //            }
 
-//            List<Video> remoteVideos = apiService.getVideoFromChannelPlaylist(channel.getYoutubeId());
-//            List<Video> currentVideos = database.getVideos(channel.getId());
-//            Map<String, Boolean> checkMapper = new HashMap<>();
-//
-//            int countInserted = 0;
-//            int countUpdated = 0;
-//            AtomicInteger countDeleted = new AtomicInteger();
-//            for (Video remoteVideo : remoteVideos) {
-//                checkMapper.put(remoteVideo.getYoutubeId(), true);
-//                remoteVideo.setChannelId(channel.getId());
-//                Video localVideo = database.isVideoExisted(channel.getId(), remoteVideo.getYoutubeId());
-//                if (localVideo != null) {
-//                    // Update video and mapping
-//                    database.updateVideo(remoteVideo);
-//                    database.deleteVideoTags(localVideo.getId());
-//                    database.insertVideoTags(localVideo.getId(), remoteVideo.getTags());
-//                    countUpdated++;
-//                } else {
-//                    // Insert video and mapping
-//                    int id = database.insertVideo(remoteVideo);
-//                    database.insertVideoChannelMapping(id, channel.getId());
-//                    if (remoteVideo.getTags() != null && remoteVideo.getTags().size() > 0)
-//                        database.insertVideoTags(id, remoteVideo.getTags());
-//                    countInserted++;
-//                }
-//
-//            }
-//            currentVideos.forEach(video -> {
-//                if (checkMapper.get(video.getYoutubeId()) == null) {
-//                    database.deleteVideoMappingById(video.getYoutubeId());
-//                    database.deleteVideoById(video.getYoutubeId());
-//                    countDeleted.getAndIncrement();
-//                }
-//            });
-//
-//            System.out.println("==============> Channel " + channel.getName() + "(id:" + channel.getYoutubeId() + ")" +
-//                    " fetched " + remoteVideos.size() + " videos ( inserted: " + countInserted
-//                    + ", updated: " + countUpdated + ", deleted: " + countDeleted.get() + ")");
-//
+            List<Video> remoteVideos = apiService.getVideoFromChannelPlaylist(channel.getYoutubeId());
+            List<Video> currentVideos = database.getVideos(channel.getId());
+            Map<String, Boolean> checkMapper = new HashMap<>();
+
+            int countInserted = 0;
+            int countUpdated = 0;
+            AtomicInteger countDeleted = new AtomicInteger();
+            for (Video remoteVideo : remoteVideos) {
+                checkMapper.put(remoteVideo.getYoutubeId(), true);
+                remoteVideo.setChannelId(channel.getId());
+                Video localVideo = database.isVideoExisted(channel.getId(), remoteVideo.getYoutubeId());
+                if (localVideo != null) {
+                    // Update video and mapping
+                    database.updateVideo(remoteVideo);
+                    database.deleteVideoTags(localVideo.getId());
+                    database.insertVideoTags(localVideo.getId(), remoteVideo.getTags());
+                    countUpdated++;
+                } else {
+                    // Insert video and mapping
+                    int id = database.insertVideo(remoteVideo);
+                    database.insertVideoChannelMapping(id, channel.getId());
+                    if (remoteVideo.getTags() != null && remoteVideo.getTags().size() > 0)
+                        database.insertVideoTags(id, remoteVideo.getTags());
+                    countInserted++;
+                }
+
+            }
+            currentVideos.forEach(video -> {
+                if (checkMapper.get(video.getYoutubeId()) == null) {
+                    database.deleteVideoMappingById(video.getYoutubeId());
+                    database.deleteVideoById(video.getYoutubeId());
+                    countDeleted.getAndIncrement();
+                }
+            });
+
+            System.out.println("==============> Channel " + channel.getName() + "(id:" + channel.getYoutubeId() + ")" +
+                    " fetched " + remoteVideos.size() + " videos ( inserted: " + countInserted
+                    + ", updated: " + countUpdated + ", deleted: " + countDeleted.get() + ")");
+
 
             // for livestream
+            AtomicReference<Integer> countLivestreamInsert = new AtomicReference<>(0);
+            AtomicReference<Integer> countLivestreamUpdate = new AtomicReference<>(0);
+            System.out.println("===========>Start update livestream");
             List<Video> livestreams = apiService.getLivesFromChannel(channel.getYoutubeId());
             livestreams.forEach(live -> {
                 // check and insert live
                 if (!database.checkLivestreamByURL(live.getUrl())) {
+                    countLivestreamInsert.getAndSet(countLivestreamInsert.get() + 1);
                     database.insertLivestream(live);
                 } else {
-                    //update
+                    countLivestreamUpdate.getAndSet(countLivestreamUpdate.get() + 1);
                     database.updateLivestream(live);
                 }
             });
+
+            System.out.println("==========>Finish livestream with inserted : " + countLivestreamInsert.get()
+                    + ", updated: " + countLivestreamUpdate.get());
 
 
             String updatedTime = DateUtil.convertStringDate(System.currentTimeMillis());
