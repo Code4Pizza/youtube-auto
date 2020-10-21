@@ -24,7 +24,7 @@ import static com.codahale.metrics.MetricRegistry.name;
 public class WebFilmDatabase {
 
     public static final String SCHEMA = "web_film";
-    public static final String HOST_PORT = "35.221.250.42:3306";
+    public static final String HOST_PORT = "103.74.121.116:3306";
     public static final String BASE_URL = String.format("jdbc:mysql://%s/%s?autoReconnect=true&useSSL=false&useUnicode=yes&characterEncoding=UTF-8", HOST_PORT, SCHEMA);
 
     public static final String USER_NAME = "film_account";
