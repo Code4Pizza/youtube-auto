@@ -2,10 +2,13 @@ package org.youtube.entities;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-
+@Data
+@NoArgsConstructor
 public class SystemConfig {
 
     @JsonProperty
@@ -23,27 +26,4 @@ public class SystemConfig {
         this.keyDescription = keyDescription;
     }
 
-    public String getKeyValue() {
-        return keyValue;
-    }
-
-    public void setKeyValue(String keyValue) {
-        this.keyValue = keyValue;
-    }
-
-    public String getKeyName() {
-        return keyName;
-    }
-
-    public void setKeyName(String keyName) {
-        this.keyName = keyName;
-    }
-
-    public String getKeyDescription() {
-        return keyDescription;
-    }
-
-    public void setKeyDescription(String keyDescription) {
-        this.keyDescription = keyDescription;
-    }
 }

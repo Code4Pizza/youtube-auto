@@ -1,9 +1,9 @@
 package org.youtube.script;
 
 import org.openqa.selenium.WebDriver;
+import org.webfilm.entity.Video;
 import org.youtube.AdRunnable;
 import org.youtube.SpamViewProc;
-import org.youtube.entities.ChannelVideo;
 import org.youtube.entities.YoutubeAccount;
 import org.youtube.google.GoogleScenario;
 import org.youtube.util.CommonUtil;
@@ -24,7 +24,7 @@ public class SearchVideoScript implements Runnable {
 
     private final CountDownLatch countDownLatch;
     private final YoutubeAccount account;
-    private final List<ChannelVideo> videos;
+    private final List<Video> videos;
     private final String channelName;
 
     private WebDriver driver;
@@ -33,7 +33,7 @@ public class SearchVideoScript implements Runnable {
 
     private Thread adThread;
 
-    public SearchVideoScript(CountDownLatch countDownLatch, YoutubeAccount account, List<ChannelVideo> videos,
+    public SearchVideoScript(CountDownLatch countDownLatch, YoutubeAccount account, List<Video> videos,
                              String channelName) {
         this.countDownLatch = countDownLatch;
         this.account = account;
@@ -65,8 +65,8 @@ public class SearchVideoScript implements Runnable {
              * */
             if (new Random().nextBoolean()) {
                 // Xem video bằng cách nhập từ khoá search tên video
-                for (ChannelVideo video : videos) {
-                    youTubeScenario.attemptToSearchByVideoTitle(video.getTitle(), channelName);
+                for (Video video : videos) {
+                    youTubeScenario.attemptToSearchByVideoTitle(video.getName(), channelName);
                     CommonUtil.pause(5);
                     break;
                 }

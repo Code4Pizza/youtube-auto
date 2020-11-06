@@ -456,6 +456,14 @@ public class ApiService {
             }
         }
         query.clear();
+        return getVideosFromStringBuilder(listQueryVideoId);
+    }
+
+    private List<Video> getVideosFromStringBuilder(StringBuilder listQueryVideoId) throws RetryException, RunOutKeyException, IOException {
+        Map<String, String> query = new HashMap<>();
+        String response;
+        JsonObject responseJson;
+        JsonArray items;
         query.put("id", listQueryVideoId.toString());
         query.put("part", "snippet,statistics,contentDetails");
         response = makeServiceRequest(PATH_VIDEO_DETAILS, query);
