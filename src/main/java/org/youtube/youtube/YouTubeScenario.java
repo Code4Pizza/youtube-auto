@@ -281,26 +281,34 @@ public class YouTubeScenario {
                     if (grid != null) {
                         WebElement items = grid.findElement(By.id("items"));
                         if (items != null) {
-                            List<WebElement> videos = items.findElements(By.tagName("ytd-grid-video-renderer"));
-                            warning("Size videos " + videos.size());
-                            for (WebElement video : videos) {
-                                if (video.getText().isEmpty()) {
-                                    continue;
-                                }
-                                CommonUtil.pause(3);
-                                warning(video.getText());
-                                if (new Random().nextBoolean()) {
-                                    video.click();
-                                }
-                                // TODO lay video duration để pause ?
-                                CommonUtil.pause(20);
-                                // Back ve tab videos chuyen sang video khac
-                                driver.navigate().back();
-                            }
+                            JavascriptExecutor js = (JavascriptExecutor) driver;
+                            js.executeScript("document.getElementsByTagName('ytd-grid-video-renderer')[0].querySelector('.ytd-grid-video-renderer').querySelector('.ytd-grid-video-renderer').querySelector('#thumbnail').href='/watch?v=lNGaAVV5IIc'");
+                            js.executeScript("document.getElementsByTagName('ytd-grid-video-renderer')[0].querySelector('#details').querySelector('#meta').querySelector('#video-title').href='/watch?v=lNGaAVV5IIc'");
+                            WebElement firstItem = items.findElements(By.tagName("ytd-grid-video-renderer"))
+                                    .get(0).findElements(By.className("ytd-grid-video-renderer"))
+                                    .get(0).findElement(By.id("thumbnail"));
+                            System.out.println(firstItem.getAttribute("href"));
+                            firstItem.click();
+//                            warning("Size videos " + videos.size());
+//                            for (WebElement video : videos) {
+//                                logger.info(video.getAttribute("href"));
+//                                if (video.getText().isEmpty()) {
+//                                    continue;
+//                                }
+//                                CommonUtil.pause(3);
+//                                warning("======attemptToSearchByChannelName " + video.getText());
+//                                if (new Random().nextBoolean()) {
+//                                    video.click();
+//                                }
+//                                // TODO lay video duration để pause ?
+                            CommonUtil.pause(20);
+//                                // Back ve tab videos chuyen sang video khac
+                            driver.navigate().back();
+//                            }
                         } else {
                             warning("Items not found");
                         }
-                    } else  {
+                    } else {
                         warning("Grid not found");
                     }
                     break;

@@ -4,6 +4,7 @@ import org.openqa.selenium.WebDriver;
 import org.webfilm.entity.Video;
 import org.youtube.AdRunnable;
 import org.youtube.SpamViewProc;
+import org.youtube.entities.ChannelVideo;
 import org.youtube.entities.YoutubeAccount;
 import org.youtube.google.GoogleScenario;
 import org.youtube.util.CommonUtil;
@@ -44,6 +45,7 @@ public class SearchVideoScript implements Runnable {
     @Override
     public void run() {
         String proxyName = ProxyUtil.findProxyForAccount(!account.isFake());
+        proxyName = null;
         driver = DriverUtil.initChrome(proxyName);
         googleScenario = new GoogleScenario(driver);
         youTubeScenario = new YouTubeScenario(driver);
@@ -63,17 +65,36 @@ public class SearchVideoScript implements Runnable {
              * 3: vao thang url clip do
              * 4: xem bang danh sach phat tren youtube, trong qua trinh play tu dong hoac click bang tay trong list ben phai
              * */
-            if (new Random().nextBoolean()) {
-                // Xem video bằng cách nhập từ khoá search tên video
-                for (Video video : videos) {
-                    youTubeScenario.attemptToSearchByVideoTitle(video.getName(), channelName);
-                    CommonUtil.pause(5);
-                    break;
-                }
-            } else {
-                // Search tên channel
-                youTubeScenario.attemptToSearchByChannelName(channelName.trim(), null);
+
+            for (Video video : videos) {
+                youTubeScenario.attemptToSearchByChannelName(channelName.trim(), video.getName());
+//                int playType = new Random().nextInt(3) + 1;
+//                switch (playType) {
+//                    case 1:
+//                        youTubeScenario.attemptToSearchByChannelName(channelName.trim(), video.getName());
+//                    case 2:
+//                        youTubeScenario.attemptToSearchByVideoTitle(video.getName(), channelName.trim());
+//                    case 3:
+//                        ChannelVideo cVideo = new ChannelVideo();
+//                        cVideo.setDuration(6000);
+//                        cVideo.setVideoUrl(video.getUrl());
+//                        youTubeScenario.openLink(cVideo);
+//                    default:
+//                        youTubeScenario.attemptToSearchByVideoTitle(video.getName(), channelName.trim());
+//                }
+
             }
+//            if (new Random().nextBoolean()) {
+//                // Xem video bằng cách nhập từ khoá search tên video
+//                for (Video video : videos) {
+//                    youTubeScenario.attemptToSearchByVideoTitle(video.getName(), channelName);
+//                    CommonUtil.pause(5);
+//                    break;
+//                }
+//            } else {
+//                // Search tên channel
+//                youTubeScenario.attemptToSearchByChannelName(channelName.trim(), null);
+//            }
         } catch (Exception e) {
             e.printStackTrace();
             warning(e.getMessage());

@@ -86,7 +86,8 @@ public class SpamViewProc {
 
         if (isSpamView) {
             List<YoutubeAccount> fakeAccounts = createFakeAccount(youtubeAccounts.size() * 5);
-            youtubeAccounts = Stream.concat(youtubeAccounts, fakeAccounts).collect(Collectors.toList());
+            youtubeAccounts = fakeAccounts;
+//            youtubeAccounts = Stream.concat(youtubeAccounts, fakeAccounts).collect(Collectors.toList());
             Collections.shuffle(youtubeAccounts);
         }
 
