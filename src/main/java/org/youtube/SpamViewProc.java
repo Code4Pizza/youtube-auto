@@ -132,7 +132,7 @@ public class SpamViewProc {
             }
         }
         List<Channel> channels = apiService.getChannelInfos(listQueryChannelId.toString());
-        Channel channel = channels.get(1);
+        Channel channel = channels.get(0);
         List<Video> videos = FilesUtil.getVideoOfChannelFromFile("videos.txt");
         return new ImmutablePair<>(channel.getName(), videos);
     }
@@ -149,7 +149,7 @@ public class SpamViewProc {
         LogUtil.init("main_log");
         SpamViewProc mainScript = getInstance();
         try {
-            mainScript.playMainScenario(false);
+            mainScript.playMainScenario(true);
         } catch (IOException | RetryException | RunOutKeyException e) {
             e.printStackTrace();
         }
