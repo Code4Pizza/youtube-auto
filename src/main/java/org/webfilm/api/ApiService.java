@@ -3,6 +3,8 @@ package org.webfilm.api;
 import com.google.gson.*;
 import org.joda.time.Period;
 import org.joda.time.format.ISOPeriodFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webfilm.entity.Channel;
 import org.webfilm.entity.Comment;
 import org.webfilm.entity.ParsedConfig;
@@ -24,6 +26,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class ApiService {
+
+    private static final Logger logger = LoggerFactory.getLogger(ApiService.class);
+
 
     public static final String BASE_URL = "https://www.googleapis.com/youtube/v3";
     public static final String PATH_LIST_VIDEO = "/search";
@@ -207,10 +212,12 @@ public class ApiService {
         try {
             StringBuilder query = new StringBuilder();
             String[] apiKeys = parsedConfig.getYoutubeApiKey();
+            logger.info("========API keys get from config size: " + apiKeys.length);
+            String currentKey = apiKeys[availableApiKeyIndex.get()];
             if (apiKeys.length < availableApiKeyIndex.get() + 1) {
                 throw new RunOutKeyException();
             }
-            query.append(String.format("key=%s", apiKeys[availableApiKeyIndex.get()]));
+            query.append(String.format("key=%s", currentKey));
             for (Map.Entry<String, String> entry : headers.entrySet()) {
                 query.append("&");
                 query.append(String.format("%s=%s", entry.getKey(), entry.getValue()));
@@ -231,8 +238,12 @@ public class ApiService {
             Reader streamReader;
 
             if (status == 403) {
+                logger.info(String.format("========Api key exceed limit : %s", apiKeys[availableApiKeyIndex.get()]));
                 // Api key exceed limit
+                // cho nay khong phai tang len ma con dao chieu lai nua
                 availableApiKeyIndex.incrementAndGet();
+                if (availableApiKeyIndex.get() == apiKeys.length)
+                    availableApiKeyIndex.set(0);
                 throw new RetryException("Api key exceed limit");
             }
 
