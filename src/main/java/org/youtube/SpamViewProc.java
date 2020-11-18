@@ -14,6 +14,7 @@ import org.webfilm.storage.WebFilmDatabase;
 import org.youtube.entities.ChannelVideo;
 import org.youtube.entities.YoutubeAccount;
 import org.youtube.entities.YoutubeChannel;
+import org.youtube.script.ReadArticlesScript;
 import org.youtube.script.SearchVideoScript;
 import org.youtube.storage.YoutubeDatabases;
 import org.youtube.util.FilesUtil;
@@ -84,23 +85,27 @@ public class SpamViewProc {
         List<YoutubeAccount> youtubeAccounts = FilesUtil.getAccountsFromFile("100_mails.txt");
         info("Total number accounts is " + youtubeAccounts.size());
 
-        if (isSpamView) {
-            List<YoutubeAccount> fakeAccounts = createFakeAccount(youtubeAccounts.size() * 5);
-            youtubeAccounts = fakeAccounts;
-//            youtubeAccounts = Stream.concat(youtubeAccounts, fakeAccounts).collect(Collectors.toList());
-            Collections.shuffle(youtubeAccounts);
-        }
+//        if (isSpamView) {
+//            List<YoutubeAccount> fakeAccounts = createFakeAccount(youtubeAccounts.size() * 5);
+//            youtubeAccounts = fakeAccounts;
+////            youtubeAccounts = Stream.concat(youtubeAccounts, fakeAccounts).collect(Collectors.toList());
+//            Collections.shuffle(youtubeAccounts);
+//        }
 
         CountDownLatch countDownLatch = new CountDownLatch(youtubeAccounts.size());
 
         for (YoutubeAccount youtubeAccount : youtubeAccounts) {
             // moi account se chay mot thread
             Pair<String, List<Video>> videos = prepareVideos();
-            executor.execute(new SearchVideoScript(
+//            executor.execute(new SearchVideoScript(
+//                    countDownLatch,
+//                    youtubeAccount,
+//                    videos.getRight(),
+//                    videos.getLeft()));
+
+            executor.execute(new ReadArticlesScript(
                     countDownLatch,
-                    youtubeAccount,
-                    videos.getRight(),
-                    videos.getLeft()));
+                    youtubeAccount));
             break;
         }
 
