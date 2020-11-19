@@ -14,7 +14,6 @@ import org.youtube.util.Constants;
 import org.youtube.util.LogUtil;
 
 import java.util.List;
-import java.util.Random;
 
 import static org.youtube.util.CommonUtil.scrollDown;
 import static org.youtube.util.LogUtil.*;
