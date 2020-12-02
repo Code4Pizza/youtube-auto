@@ -136,4 +136,12 @@ public interface WebFilmDAO {
     void updateLivestream(@Bind("name") String name, @Bind("description") String description,
                           @Bind("url") String url);
 
+    @SqlUpdate("DELETE FROM video_channel_mapping \n" +
+            "where video_id in (SELECT id from videos where channel_id not in (select id from channels))")
+    void deleteVideoChannelMappingWhenChannelDelete();
+
+    @SqlUpdate("DELETE FROM video_film_mapping \n" +
+            "where video_id in (SELECT id from videos where channel_id not in (select id from channels))")
+    void deleteVideoFilmMappingWhenChannelDelete();
+
 }
