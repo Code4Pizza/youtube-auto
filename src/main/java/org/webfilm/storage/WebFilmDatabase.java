@@ -83,6 +83,13 @@ public class WebFilmDatabase {
             }
         }));
     }
+    public Video isVideoExistedOnlyById(String youtubeId) {
+        return database.with(jdbi -> jdbi.withHandle(handle -> {
+            try (Timer.Context ignored = defaultTimer.time()) {
+                return handle.attach(WebFilmDAO.class).getVideoByYoutubeId(youtubeId);
+            }
+        }));
+    }
 
     public int insertVideo(Video video) {
         return database.with(jdbi -> jdbi.withHandle(handle -> {

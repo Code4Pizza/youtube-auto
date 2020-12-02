@@ -30,6 +30,10 @@ public interface WebFilmDAO {
     @RegisterConstructorMapper(Video.class)
     Video getVideoByYoutubeId(@Bind("channel_id") int channelId, @Bind("youtube_id") String youtubeId);
 
+    @SqlQuery("SELECT * FROM videos WHERE youtube_id=:youtube_id")
+    @RegisterConstructorMapper(Video.class)
+    Video getVideoByYoutubeId(@Bind("youtube_id") String youtubeId);
+
     @SqlQuery("select count(*) as total from livestreams where url=:url")
     Integer checkLivestreamByURL(@Bind("url") String url);
 

@@ -65,11 +65,16 @@ public class QueryVideoJob implements Runnable {
                     countUpdated++;
                 } else {
                     // Insert video and mapping
-                    int id = database.insertVideo(remoteVideo);
-                    database.insertVideoChannelMapping(id, channel.getId());
-                    if (remoteVideo.getTags() != null && remoteVideo.getTags().size() > 0)
-                        database.insertVideoTags(id, remoteVideo.getTags());
-                    countInserted++;
+                    localVideo = database.isVideoExistedOnlyById(remoteVideo.getYoutubeId());
+                    if (localVideo != null) {
+                        int id = database.insertVideo(remoteVideo);
+                        database.insertVideoChannelMapping(id, channel.getId());
+                        if (remoteVideo.getTags() != null && remoteVideo.getTags().size() > 0)
+                            database.insertVideoTags(id, remoteVideo.getTags());
+                        countInserted++;
+                    } else {
+                        System.out.println("======Duplicate video : " + remoteVideo.getYoutubeId());
+                    }
                 }
 
             }
