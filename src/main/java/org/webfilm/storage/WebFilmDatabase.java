@@ -345,4 +345,14 @@ public class WebFilmDatabase {
             return null;
         }));
     }
+
+    public void deleteFinalSql() {
+        database.with(jdbi -> jdbi.withHandle(handle -> {
+            try (Timer.Context ignored = defaultTimer.time()) {
+                handle.attach(WebFilmDAO.class).deleteVideoChannelMappingWhenChannelDelete();
+                handle.attach(WebFilmDAO.class).deleteVideoFilmMappingWhenChannelDelete();
+                return null;
+            }
+        }));
+    }
 }

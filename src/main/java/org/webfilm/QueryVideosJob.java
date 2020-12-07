@@ -80,6 +80,8 @@ public class QueryVideosJob {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        // bat dau xoa du lieu thua trong qua trinh xu ly
+        database.deleteFinalSql();
         System.out.println("Query videos job finished ");
     }
 

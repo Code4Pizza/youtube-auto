@@ -159,7 +159,8 @@ public class ApiService {
 
         try {
             JsonObject statisticsObject = itemObject.getAsJsonObject("statistics");
-            subscribers = Integer.parseInt(statisticsObject.get("subscriberCount").getAsString());
+            if (statisticsObject.has("subscriberCount"))
+                subscribers = Integer.parseInt(statisticsObject.get("subscriberCount").getAsString());
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Failed to fetch statistics of " + youtubeId);
