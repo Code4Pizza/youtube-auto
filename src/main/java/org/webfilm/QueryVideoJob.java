@@ -66,7 +66,7 @@ public class QueryVideoJob implements Runnable {
                 } else {
                     // Insert video and mapping
                     localVideo = database.isVideoExistedOnlyById(remoteVideo.getYoutubeId());
-                    if (localVideo != null) {
+                    if (localVideo == null) {
                         int id = database.insertVideo(remoteVideo);
                         database.insertVideoChannelMapping(id, channel.getId());
                         if (remoteVideo.getTags() != null && remoteVideo.getTags().size() > 0)
@@ -74,6 +74,11 @@ public class QueryVideoJob implements Runnable {
                         countInserted++;
                     } else {
                         System.out.println("======Duplicate video : " + remoteVideo.getYoutubeId());
+                        // Update video and mapping
+                        database.updateVideo(remoteVideo);
+                        database.deleteVideoTags(localVideo.getId());
+                        database.insertVideoTags(localVideo.getId(), remoteVideo.getTags());
+                        countUpdated++;
                     }
                 }
 
