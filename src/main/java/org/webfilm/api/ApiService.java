@@ -137,6 +137,7 @@ public class ApiService {
         String description = "";
         String avatar = "";
         int subscribers = 0;
+        Long views = 0l;
 
         try {
             JsonObject snippetObject = itemObject.getAsJsonObject("snippet");
@@ -161,12 +162,14 @@ public class ApiService {
             JsonObject statisticsObject = itemObject.getAsJsonObject("statistics");
             if (statisticsObject.has("subscriberCount"))
                 subscribers = Integer.parseInt(statisticsObject.get("subscriberCount").getAsString());
+            if (statisticsObject.has("viewCount"))
+                views = Long.parseLong(statisticsObject.get("viewCount").getAsString());
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Failed to fetch statistics of " + youtubeId);
         }
 
-        return new Channel(name, youtubeUrl, youtubeId, description, avatar, subscribers);
+        return new Channel(name, youtubeUrl, youtubeId, description, avatar, subscribers, views);
     }
 
     public static Comment deserializeComment(JsonElement json, Type type, JsonDeserializationContext context) {

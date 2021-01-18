@@ -83,6 +83,7 @@ public class WebFilmDatabase {
             }
         }));
     }
+
     public Video isVideoExistedOnlyById(String youtubeId) {
         return database.with(jdbi -> jdbi.withHandle(handle -> {
             try (Timer.Context ignored = defaultTimer.time()) {
@@ -152,6 +153,7 @@ public class WebFilmDatabase {
         List<String> descriptions = new ArrayList<>();
         List<String> avatars = new ArrayList<>();
         List<Integer> subs = new ArrayList<>();
+        List<Long> views = new ArrayList<>();
         List<String> youtubeIds = new ArrayList<>();
 
         for (Channel channel : channels) {
@@ -159,12 +161,13 @@ public class WebFilmDatabase {
             descriptions.add(channel.getDescription());
             avatars.add(channel.getAvatar());
             subs.add(channel.getSubscribers());
+            views.add(channel.getViews());
             youtubeIds.add(channel.getYoutubeId());
         }
 
         database.with(jdbi -> jdbi.withHandle(handle -> {
             try (Timer.Context ignored = defaultTimer.time()) {
-                handle.attach(WebFilmDAO.class).bulkUpdateChannelInfo(names, descriptions, avatars, subs, youtubeIds);
+                handle.attach(WebFilmDAO.class).bulkUpdateChannelInfo(names, descriptions, avatars, subs, views, youtubeIds);
                 return null;
             }
         }));

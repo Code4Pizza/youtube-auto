@@ -31,6 +31,9 @@ public class Channel {
     @JsonProperty
     private String updatedTime;
 
+    @JsonProperty
+    private Long views;
+
     public Channel() {
     }
 
@@ -45,13 +48,15 @@ public class Channel {
 
     public Channel(String name, String youtubeUrl,
                    @ColumnName("youtube_id") String youtubeId,
-                   String description, String avatar, int subscribers) {
+                   String description, String avatar, int subscribers,
+                   Long views) {
         this.name = name;
         this.youtubeUrl = youtubeUrl;
         this.youtubeId = youtubeId;
         this.description = description;
         this.avatar = avatar;
         this.subscribers = subscribers;
+        this.views = views;
     }
 
     public int getId() {
@@ -88,6 +93,10 @@ public class Channel {
 
     public void setUpdatedTime(String updatedTime) {
         this.updatedTime = updatedTime;
+    }
+
+    public Long getViews() {
+        return views;
     }
 
     @Override
