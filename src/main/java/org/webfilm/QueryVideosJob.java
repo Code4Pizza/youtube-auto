@@ -94,6 +94,9 @@ public class QueryVideosJob {
             }
         }
         List<Channel> infos = apiService.getChannelInfos(listQueryChannelId.toString());
+        infos.forEach(item ->{
+            System.out.println(database.updateChannelView(item) ? "Updated views" : "Update channel view failed");;
+        });
 
         // compare deleted channel
         if (infos.size() < channels.size()) {
@@ -104,8 +107,6 @@ public class QueryVideosJob {
                 }
             });
         }
-
-
         database.bulkUpdateChannelInfo(infos);
     }
 

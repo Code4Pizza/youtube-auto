@@ -135,15 +135,11 @@ public class WebFilmDatabase {
         }));
     }
 
-    public boolean updateChannelInfo(Channel channel) {
+    public boolean updateChannelView(Channel channel) {
         return database.with(jdbi -> jdbi.withHandle(handle -> {
             try (Timer.Context ignored = defaultTimer.time()) {
-                return handle.attach(WebFilmDAO.class).updateChannelInfo(
-                        channel.getName(),
-                        channel.getDescription(),
-                        channel.getAvatar(),
-                        channel.getSubscribers(),
-                        channel.getYoutubeId()) > 0;
+                return handle.attach(WebFilmDAO.class).bulkUpdateChannelViews(channel.getName(),
+                        channel.getYoutubeId(), channel.getViews()) > 0;
             }
         }));
     }
@@ -287,24 +283,24 @@ public class WebFilmDatabase {
     }
 
     public void insertVideoTags(int id, List<String> tags) {
-        String sql = " insert into tags(tag_id, tag_name, tag_type) values(:id, :name, :type)";
-        database.use(jdbi -> jdbi.useTransaction(TransactionIsolationLevel.SERIALIZABLE, handle -> {
-            try (Timer.Context ignored = defaultTimer.time()) {
-                PreparedBatch preparedBatch = handle.prepareBatch(sql);
-
-                for (String tag : tags) {
-                    preparedBatch
-                            .bind("id", id)
-                            .bind("name", tag)
-                            .bind("type", 1)
-                            .add();
-                }
-
-                if (preparedBatch.size() > 0) {
-                    preparedBatch.execute();
-                }
-            }
-        }));
+//        String sql = " insert into tags(tag_id, tag_name, tag_type) values(:id, :name, :type)";
+//        database.use(jdbi -> jdbi.useTransaction(TransactionIsolationLevel.SERIALIZABLE, handle -> {
+//            try (Timer.Context ignored = defaultTimer.time()) {
+//                PreparedBatch preparedBatch = handle.prepareBatch(sql);
+//
+//                for (String tag : tags) {
+//                    preparedBatch
+//                            .bind("id", id)
+//                            .bind("name", tag)
+//                            .bind("type", 1)
+//                            .add();
+//                }
+//
+//                if (preparedBatch.size() > 0) {
+//                    preparedBatch.execute();
+//                }
+//            }
+//        }));
     }
 
     public void deleteChanel(Channel channel) {

@@ -66,11 +66,17 @@ public interface WebFilmDAO {
     int updateChannelInfo(@Bind("name") String name, @Bind("description") String description, @Bind("avatar") String avatar,
                           @Bind("subscribers") int subscribers, @Bind("youtube_id") String youtubeId);
 
+
+    @SqlUpdate("INSERT INTO web_film.channel_views\n" +
+            "(name, youtube_id, updated_at, views)\n" +
+            "VALUES(:name, :youtubeId, CURRENT_TIMESTAMP, :view);\n")
+    int bulkUpdateChannelViews(@Bind("name") String name, @Bind("youtubeId") String id,@Bind("view") Long view);
+
     @SqlBatch("UPDATE channels SET `name`=:name, description=:description, avatar=:avatar," +
             " subscribers=:subscribers, views=:views WHERE youtube_id=:youtube_id")
     @BatchChunkSize(1000)
     void bulkUpdateChannelInfo(@Bind("name") List<String> names, @Bind("description") List<String> descriptions, @Bind("avatar") List<String> avatars,
-                               @Bind("subscribers") List<Integer> subscribers,@Bind("subscribers") List<Long> views,
+                               @Bind("subscribers") List<Integer> subscribers,@Bind("views") List<Long> views,
                                @Bind("youtube_id") List<String> youtubeIds);
 
 
